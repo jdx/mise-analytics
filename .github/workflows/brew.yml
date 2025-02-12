@@ -1,0 +1,44 @@
+name: Homebrew Analytics Check
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs daily at midnight UTC
+  workflow_dispatch:      # Allows manual trigger
+
+jobs:
+  brew:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Homebrew Analytics and GitHub Stars
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DATE=$(date '+%Y-%m-%d')
+          
+          # Fetch Homebrew analytics
+          curl https://formulae.brew.sh/api/analytics/install-on-request/30d.json | \
+          jq '.items.[] | select(.formula == "mise")' | \
+          tee analytics.json
+          
+          # Fetch GitHub stars
+          STARS=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+                 https://api.github.com/repos/jdx/mise | \
+                 jq '.stargazers_count')
+          
+          # Convert to CSV format and append to history file
+          echo "$DATE,$(jq -r '[.number, .formula, .count, .percent] | @csv' analytics.json | tr -d '"'),$STARS" >> mise.csv
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add mise.csv
+          git commit -m "Update Homebrew analytics data [skip ci]" || exit 0
+          git push
+
+permissions:
+  contents: write
