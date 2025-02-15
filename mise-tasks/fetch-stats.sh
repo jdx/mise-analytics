@@ -15,7 +15,6 @@ STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
 
 # Convert to CSV format and append to history file
 echo "$DATE,$(jq -r '[.number, (.count | gsub(","; "")), .percent] | @csv' /tmp/analytics.json | tr -d '"'),$STARS" >> mise.csv
-cat mise.csv
 uniq -w 10 mise.csv > /tmp/mise.csv && mv /tmp/mise.csv mise.csv 
 
 # Create a diff CSV showing daily changes
@@ -32,5 +31,3 @@ awk -F',' 'NR>1{
     prev_installs=$3
     prev_stars=$5
 }' mise.csv >> mise-diff.csv
-
-cat mise-diff.csv 

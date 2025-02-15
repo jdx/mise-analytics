@@ -5,7 +5,7 @@ DATE=$(date '+%Y-%m-%d')
 
 # Fetch GitHub stars for competitors
 MISE_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-       https://api.github.com/repos/mise-app/mise | \
+       https://api.github.com/repos/jdx/mise | \
        jq '.stargazers_count')
 
 NIX_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
@@ -22,5 +22,4 @@ if [ ! -f competitors.csv ]; then
 fi
 
 echo "$DATE,$MISE_STARS,$NIX_STARS,$ASDF_STARS" >> competitors.csv
-cat competitors.csv
 uniq -w 10 competitors.csv > /tmp/competitors.csv && mv /tmp/competitors.csv competitors.csv 
