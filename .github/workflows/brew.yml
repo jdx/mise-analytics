@@ -34,7 +34,7 @@ jobs:
           git config --global user.email 'action@github.com'
           git add mise.csv mise-diff.csv mise_stats.png competitors.csv
           git diff --cached
-          git commit -m "update stats [skip ci]" || exit 0
+          git commit -m "update stats" || exit 0
           git push
 
 permissions:
