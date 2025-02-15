@@ -35,6 +35,7 @@ jobs:
           git add mise.csv mise-diff.csv mise_stats.png competitors.csv
           git diff --cached
           git commit -m "update stats [skip ci]" || exit 0
+          git push
 
 permissions:
   contents: write
