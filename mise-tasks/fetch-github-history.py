@@ -63,7 +63,7 @@ async def fetch_stargazer_history(repo, session, pbar):
     return daily_stars
 
 async def fetch_all_repos():
-    repos = ['jdx/mise', 'NixOS/nix', 'asdf-vm/asdf']
+    repos = ['jdx/mise', 'NixOS/nix', 'asdf-vm/asdf', 'jdx/hk']
     async with aiohttp.ClientSession() as session:
         pbars = [tqdm(position=i) for i in range(len(repos))]
         tasks = [fetch_stargazer_history(repo, session, pbar) 
@@ -120,23 +120,26 @@ def main():
     all_dates = sorted(
         set(star_histories['jdx/mise'].keys()) | 
         set(star_histories['NixOS/nix'].keys()) | 
-        set(star_histories['asdf-vm/asdf'].keys()))
-    mise_cumulative = nix_cumulative = asdf_cumulative = 0
+        set(star_histories['asdf-vm/asdf'].keys()) |
+        set(star_histories['jdx/hk'].keys()))
+    mise_cumulative = nix_cumulative = asdf_cumulative = hk_cumulative = 0
     competitor_data = []
     
     for date in all_dates:
         mise_cumulative += star_histories['jdx/mise'].get(date, 0)
         nix_cumulative += star_histories['NixOS/nix'].get(date, 0)
         asdf_cumulative += star_histories['asdf-vm/asdf'].get(date, 0)
+        hk_cumulative += star_histories['jdx/hk'].get(date, 0)
         competitor_data.append({
             'date': date,
             'mise_stars': str(mise_cumulative),
             'nix_stars': str(nix_cumulative),
-            'asdf_stars': str(asdf_cumulative)
+            'asdf_stars': str(asdf_cumulative),
+            'hk_stars': str(hk_cumulative)
         })
 
     # Write competitors.csv
-    fieldnames = ['date', 'mise_stars', 'nix_stars', 'asdf_stars']
+    fieldnames = ['date', 'mise_stars', 'nix_stars', 'asdf_stars', 'hk_stars']
     with open('competitors.csv', 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()

@@ -45,19 +45,29 @@ line2 = ax2.plot(
 # Plot competitor stars
 color3 = '#27AE60'  # Green
 color4 = '#8E44AD'  # Purple
+color5 = '#F1C40F'  # Yellow
+
+# Filter out zero values before plotting
 line3 = ax2.plot(
-    df_comp['date'],
-    df_comp['nix_stars'],
+    df_comp[df_comp['nix_stars'] > 0]['date'],
+    df_comp[df_comp['nix_stars'] > 0]['nix_stars'],
     color=color3,
     linestyle='--',
     label='nix'
 )
 line4 = ax2.plot(
-    df_comp['date'],
-    df_comp['asdf_stars'],
+    df_comp[df_comp['asdf_stars'] > 0]['date'],
+    df_comp[df_comp['asdf_stars'] > 0]['asdf_stars'],
     color=color4,
     linestyle='--',
     label='asdf'
+)
+line5 = ax2.plot(
+    df_comp[df_comp['hk_stars'] > 0]['date'],
+    df_comp[df_comp['hk_stars'] > 0]['hk_stars'],
+    color=color5,
+    linestyle='--',
+    label='hk'
 )
 
 # Calculate crossing points
@@ -161,7 +171,7 @@ ax1.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
 plt.xticks(rotation=45)
 
 # Add legend
-lines = line1 + line2 + line3 + line4
+lines = line1 + line2 + line3 + line4 + line5
 labels = [line.get_label() for line in lines]
 ax1.legend(lines, labels, loc='center left')
 
