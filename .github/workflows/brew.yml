@@ -32,7 +32,7 @@ jobs:
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
-          git add mise.csv mise-diff.csv mise_stats.png competitors.csv
+          git add *.csv mise_stats.png
           git diff --cached
           git commit -m "update stats" || exit 0
           git push
