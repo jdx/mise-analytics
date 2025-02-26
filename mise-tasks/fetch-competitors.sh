@@ -8,10 +8,6 @@ MISE_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
        https://api.github.com/repos/jdx/mise | \
        jq '.stargazers_count')
 
-NIX_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-       https://api.github.com/repos/NixOS/nix | \
-       jq '.stargazers_count')
-
 ASDF_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
        https://api.github.com/repos/asdf-vm/asdf | \
        jq '.stargazers_count')
@@ -22,10 +18,10 @@ HK_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
 
 # Create or append to competitors.csv
 if [ ! -f competitors.csv ]; then
-    echo "date,mise_stars,nix_stars,asdf_stars,hk_stars" > competitors.csv
+    echo "date,mise_stars,asdf_stars,hk_stars" > competitors.csv
 fi
 
-echo "$DATE,$MISE_STARS,$NIX_STARS,$ASDF_STARS,$HK_STARS" >> competitors.csv
+echo "$DATE,$MISE_STARS,$ASDF_STARS,$HK_STARS" >> competitors.csv
 uniq=uniq
 if command -v guniq &> /dev/null; then
     uniq=guniq
