@@ -1,0 +1,41 @@
+name: brew
+
+on:
+  schedule:
+    - cron: '0 8 * * *' 
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  brew:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: jdx/mise-action@v2
+
+      - name: Fetch Homebrew Analytics and GitHub Stars
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mise run fetch-stats
+          mise run fetch-competitors
+      - run: mise run plot-stats
+
+      - name: Commit changes
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add *.csv mise_stats.png
+          git diff --cached
+          git commit -m "update stats" || exit 0
+          git push
+
+permissions:
+  contents: write

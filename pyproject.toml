@@ -1,0 +1,14 @@
+[project]
+name = "mise-analytics"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "matplotlib>=3.10.0",
+    "pandas>=2.2.3",
+    "requests>=2.32.3",
+    "aiohttp>=3.9.3",
+    "tqdm>=4.66.2",
+    "scipy>=1.15.1",
+]
