@@ -1,0 +1,13 @@
+# Top repos list - automatically managed
+# This list contains the current top 10 active repos (refreshed regularly)
+# Filters: excludes archived repos, forks, sample/demo projects, and repos not updated in >1 year
+mise
+hk
+usage
+mise-action
+demand
+fnox
+pitchfork
+expr.rs
+xx
+mise-analytics

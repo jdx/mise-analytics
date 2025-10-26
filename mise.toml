@@ -2,4 +2,4 @@
 uv = "latest"
 
 [task_config]
-dir = "./tasks"
+dir = "./mise-tasks"

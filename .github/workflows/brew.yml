@@ -26,15 +26,26 @@ jobs:
         run: |
           mise run fetch-stats
           mise run fetch-competitors
-      - run: mise run plot-stats
+          mise run fetch-hk-competitors
+          mise run fetch-top-repos
+
+      - name: Generate plots
+        run: |
+          mise run plot-stats
+          mise run plot-hk-stats
+          mise run plot-top-repos
+          mise run plot-brew-rankings
+          mise run plot-mise-brew-rank
+          mise run generate-fastest-growing
 
       - name: Commit changes
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
-          git add *.csv mise_stats.png
+          git add *.csv *.txt charts/*.png
           git diff --cached
-          git commit -m "update stats" || exit 0
+          COMMIT_MSG=$(uv run python mise-tasks/generate-commit-message.py)
+          git commit -m "$COMMIT_MSG" || exit 0
           git push
 
 permissions:

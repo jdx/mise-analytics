@@ -7,25 +7,23 @@ from datetime import datetime
 import numpy as np
 from scipy import stats
 
-# Read the CSV files
-df = pd.read_csv('mise.csv')
-df_comp = pd.read_csv('competitors.csv')
+# Read the CSV file
+df_comp = pd.read_csv('hk-competitors.csv')
 
-# Convert date columns to datetime
-df['date'] = pd.to_datetime(df['date'])
+# Convert date column to datetime
 df_comp['date'] = pd.to_datetime(df_comp['date'])
 
 # Filter data from 2023-01-01
 start_date = '2023-01-01'
-df = df[df['date'] >= start_date]
 df_comp = df_comp[df_comp['date'] >= start_date]
 
 # Create figure with single axis for GitHub stars
 fig, ax = plt.subplots(figsize=(12, 6))
 
-# Calculate daily averages
-def calc_daily_avg(data, col_name):
+# Calculate daily averages for each repo
+def calc_daily_avg(df, col_name):
     """Calculate average stars per day"""
+    data = df[df[col_name] > 0]
     if len(data) < 2:
         return 0
     first_stars = data[col_name].iloc[0]
@@ -35,38 +33,46 @@ def calc_daily_avg(data, col_name):
         return 0
     return (last_stars - first_stars) / days
 
-mise_avg = calc_daily_avg(df, 'github_stars')
-asdf_data = df_comp[df_comp['asdf_stars'] > 0]
-asdf_avg = calc_daily_avg(asdf_data, 'asdf_stars') if len(asdf_data) > 0 else 0
-nixpkgs_data = df_comp[df_comp['nixpkgs_stars'] > 0]
-nixpkgs_avg = calc_daily_avg(nixpkgs_data, 'nixpkgs_stars') if len(nixpkgs_data) > 0 else 0
+hk_avg = calc_daily_avg(df_comp, 'hk_stars')
+precommit_avg = calc_daily_avg(df_comp, 'precommit_stars')
+prek_avg = calc_daily_avg(df_comp, 'prek_stars')
+lefthook_avg = calc_daily_avg(df_comp, 'lefthook_stars')
 
-# Plot github_stars (will update label after predictions)
+# Plot hk stars
 color2 = '#E67E22'  # Orange
-color4 = '#8E44AD'  # Purple
-color5 = '#3498DB'  # Blue
-
 line2 = ax.plot(
-    df['date'],
-    df['github_stars'],
+    df_comp[df_comp['hk_stars'] > 0]['date'],
+    df_comp[df_comp['hk_stars'] > 0]['hk_stars'],
     color=color2,
-    label=f'mise (+{mise_avg:.1f}/day)'
+    label=f'hk (+{hk_avg:.1f}/day)'
 )
+
+# Plot competitor stars
+color3 = '#8E44AD'  # Purple
+color4 = '#F1C40F'  # Yellow
+color5 = '#2ECC71'  # Green
 
 # Filter out zero values before plotting
+line3 = ax.plot(
+    df_comp[df_comp['precommit_stars'] > 0]['date'],
+    df_comp[df_comp['precommit_stars'] > 0]['precommit_stars'],
+    color=color3,
+    linestyle='--',
+    label=f'pre-commit (+{precommit_avg:.1f}/day)'
+)
 line4 = ax.plot(
-    df_comp[df_comp['asdf_stars'] > 0]['date'],
-    df_comp[df_comp['asdf_stars'] > 0]['asdf_stars'],
+    df_comp[df_comp['prek_stars'] > 0]['date'],
+    df_comp[df_comp['prek_stars'] > 0]['prek_stars'],
     color=color4,
     linestyle='--',
-    label=f'asdf (+{asdf_avg:.1f}/day)'
+    label=f'prek (+{prek_avg:.1f}/day)'
 )
 line5 = ax.plot(
-    df_comp[df_comp['nixpkgs_stars'] > 0]['date'],
-    df_comp[df_comp['nixpkgs_stars'] > 0]['nixpkgs_stars'],
+    df_comp[df_comp['lefthook_stars'] > 0]['date'],
+    df_comp[df_comp['lefthook_stars'] > 0]['lefthook_stars'],
     color=color5,
     linestyle='--',
-    label=f'nixpkgs (+{nixpkgs_avg:.1f}/day)'
+    label=f'lefthook (+{lefthook_avg:.1f}/day)'
 )
 
 # Calculate crossing points
@@ -74,44 +80,44 @@ def predict_crossing(df_comp, tool, days=30):
     # Use specified days of data for prediction
     cutoff_date = df_comp['date'].max() - pd.Timedelta(days=days)
     recent_data = df_comp[df_comp['date'] >= cutoff_date].copy()
-    
+
     # Convert dates to numbers for regression
     x = (recent_data['date'] - recent_data['date'].min()).dt.days
-    
+
     # Get growth rates
-    mise_slope, mise_intercept, _, _, _ = stats.linregress(x, recent_data['mise_stars'])
+    hk_slope, hk_intercept, _, _, _ = stats.linregress(x, recent_data['hk_stars'])
     tool_slope, tool_intercept, _, _, _ = stats.linregress(x, recent_data[f'{tool}_stars'])
-    
+
     # Calculate crossing point
-    if mise_slope <= tool_slope:
+    if hk_slope <= tool_slope:
         return None
-    
+
     # Get current values
-    mise_current = df_comp['mise_stars'].iloc[-1]
+    hk_current = df_comp['hk_stars'].iloc[-1]
     tool_current = df_comp[f'{tool}_stars'].iloc[-1]
-    
+
     # If we're already ahead, return today
-    if mise_current >= tool_current:
-        return datetime.now(), mise_slope - tool_slope
-    
+    if hk_current >= tool_current:
+        return datetime.now(), hk_slope - tool_slope
+
     # Calculate days until crossing based on recent growth rates
-    stars_diff = tool_current - mise_current
-    daily_gain = mise_slope - tool_slope
+    stars_diff = tool_current - hk_current
+    daily_gain = hk_slope - tool_slope
     days_to_cross = stars_diff / daily_gain if daily_gain > 0 else None
-    
+
     if days_to_cross is None or days_to_cross < 0:
         return None
-        
+
     # Cap maximum prediction at 10 years to avoid overflow
     if days_to_cross > 3650:  # ~10 years
         return None
-    
+
     crossing_date = datetime.now() + pd.Timedelta(days=int(days_to_cross))
     return crossing_date, daily_gain
 
-# Calculate predictions for asdf and nixpkgs
-prediction_labels = {}
-for tool, color in [('asdf', color4), ('nixpkgs', color5)]:
+# Add predictions box and markers
+predictions = []
+for tool, color in [('precommit', color3), ('prek', color4), ('lefthook', color5)]:
     timeframes = [30, 90, 180]
     valid_predictions = []
     daily_gains = []
@@ -133,14 +139,17 @@ for tool, color in [('asdf', color4), ('nixpkgs', color5)]:
         days_until = (avg_date - datetime.now()).days
         date_str = avg_date.strftime('%Y-%m-%d')
 
-        # Store prediction for legend
-        prediction_labels[tool] = f" (passes {date_str}, {days_until} days)"
+        # Format display name
+        display_name = 'pre-commit' if tool == 'precommit' else tool
+
+        # Add prediction text
+        predictions.append(f"Will pass {display_name}: {date_str} ({days_until:,} days, +{avg_gain:.1f}/day)")
 
         # Add marker if in the future
         if days_until > 0:
             ax.axvline(x=avg_date, color=color, linestyle=':', alpha=0.5)
             y_pos = df_comp[f'{tool}_stars'].iloc[-1]
-            ax.annotate(f'Passes {tool}',
+            ax.annotate(f'Passes {display_name}',
                        xy=(avg_date, y_pos),
                        xytext=(-50, 20),
                        textcoords='offset points',
@@ -150,23 +159,28 @@ for tool, color in [('asdf', color4), ('nixpkgs', color5)]:
                                      connectionstyle='arc3,rad=.2',
                                      color=color))
 
+if predictions:
+    # Create text box
+    box_text = '\n'.join(['Predictions:'] + predictions)
+    props = dict(boxstyle='round', facecolor='white', alpha=0.8, edgecolor='gray')
+    ax.text(0.02, 0.98, box_text,
+            transform=ax.transAxes,
+            fontsize=9,
+            verticalalignment='top',
+            horizontalalignment='left',
+            bbox=props)
+
 ax.set_ylabel('GitHub Stars', fontsize=12)
 ax.set_xlabel('Date', fontsize=12)
 ax.grid(True, alpha=0.3)
 
 # Set title and format date
-plt.title('mise: GitHub Stars Over Time', fontsize=14, fontweight='bold')
+plt.title('hk: GitHub Stars Over Time', fontsize=14, fontweight='bold')
 ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
 plt.xticks(rotation=45)
 
-# Update labels with predictions and create legend
-asdf_label = f'asdf (+{asdf_avg:.1f}/day)' + prediction_labels.get('asdf', '')
-nixpkgs_label = f'nixpkgs (+{nixpkgs_avg:.1f}/day)' + prediction_labels.get('nixpkgs', '')
-
-line4[0].set_label(asdf_label)
-line5[0].set_label(nixpkgs_label)
-
-lines = line2 + line4 + line5
+# Add legend
+lines = line2 + line3 + line4 + line5
 labels = [line.get_label() for line in lines]
 ax.legend(lines, labels, loc='upper left')
 
@@ -174,4 +188,4 @@ ax.legend(lines, labels, loc='upper left')
 plt.tight_layout()
 
 # Save the plot
-plt.savefig('charts/mise_stats.png', dpi=300, bbox_inches='tight')
+plt.savefig('charts/hk_stats.png', dpi=300, bbox_inches='tight')
