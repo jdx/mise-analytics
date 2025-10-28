@@ -42,7 +42,7 @@ jobs:
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
-          git add *.csv *.txt charts/*.png
+          git add *.csv *.txt charts/*.png README.md
           git diff --cached
           COMMIT_MSG=$(uv run python mise-tasks/generate-commit-message.py)
           git commit -m "$COMMIT_MSG" || exit 0
