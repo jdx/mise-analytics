@@ -3,8 +3,8 @@
 # Filters: excludes archived repos, forks, sample/demo projects, and repos not updated in >1 year
 mise
 hk
-usage
 fnox
+usage
 mise-action
 demand
 pitchfork
