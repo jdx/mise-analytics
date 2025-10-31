@@ -2,8 +2,8 @@
 # This list contains the current top 10 active repos (refreshed regularly)
 # Filters: excludes archived repos, forks, sample/demo projects, and repos not updated in >1 year
 mise
-hk
 fnox
+hk
 usage
 mise-action
 demand
