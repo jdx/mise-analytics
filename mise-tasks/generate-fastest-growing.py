@@ -125,8 +125,8 @@ def predict_crossing(df_comp: pd.DataFrame, tool: str, days: int = 90):
     if mise_slope <= tool_slope:
         return None
 
-    mise_current = mise_series.iloc[-1]
-    tool_current = tool_series.iloc[-1]
+    mise_current = df_comp["mise_stars"].iloc[-1]
+    tool_current = df_comp[f"{tool}_stars"].iloc[-1]
 
     if mise_current >= tool_current:
         return datetime.now(UTC), mise_slope - tool_slope
@@ -142,7 +142,8 @@ def predict_crossing(df_comp: pd.DataFrame, tool: str, days: int = 90):
     if days_to_cross < 0 or days_to_cross > 3650:
         return None
 
-    return datetime.now(UTC) + timedelta(days=days_to_cross), daily_gain
+    crossing_date = datetime.now(UTC) + timedelta(days=int(days_to_cross))
+    return crossing_date, daily_gain
 
 
 def build_upcoming_crossovers(df_comp: pd.DataFrame) -> str:
@@ -163,19 +164,40 @@ def build_upcoming_crossovers(df_comp: pd.DataFrame) -> str:
     predictions = []
 
     for comp in competitors:
-        result = predict_crossing(df_comp, comp, days=90)
-        if not result:
+        # Calculate predictions for multiple timeframes like the chart does
+        timeframes = [30, 90, 180]
+        valid_predictions = []
+        daily_gains = []
+
+        for days in timeframes:
+            result = predict_crossing(df_comp, comp, days=days)
+            if result:
+                cross_date, daily_gain = result
+                valid_predictions.append(cross_date)
+                daily_gains.append(daily_gain)
+
+        if not valid_predictions:
             continue
-        cross_date, daily_gain = result
-        if cross_date < datetime.now(UTC):
+
+        # Calculate average prediction
+        total_timedelta = sum(
+            (d - valid_predictions[0] for d in valid_predictions[1:]),
+            timedelta(0)
+        )
+        avg_timedelta = total_timedelta / len(valid_predictions)
+        avg_date = valid_predictions[0] + avg_timedelta
+        avg_gain = sum(daily_gains) / len(daily_gains)
+        days_until = max((avg_date - datetime.now(UTC)).days, 0)
+
+        if avg_date < datetime.now(UTC):
             continue
-        days_until = max((cross_date - datetime.now(UTC)).days, 0)
+
         predictions.append(
             {
                 "competitor": comp,
-                "cross_date": cross_date,
+                "cross_date": avg_date,
                 "days_until": days_until,
-                "daily_gain": daily_gain,
+                "daily_gain": avg_gain,
             }
         )
 
