@@ -6,8 +6,8 @@
 
 | Competitor | Expected Crossover | Days Until | mise lead gain (stars/day) |
 | --- | --- | --- | --- |
-| nixpkgs | 2026-01-15 | 55 | 17.5 |
-| asdf | 2026-03-04 | 104 | 30.3 |
+| asdf | 2026-03-21 | 120 | 26.5 |
+| nixpkgs | 2026-11-03 | 347 | 12.6 |
 
 <!-- END upcoming-crossovers -->
 
