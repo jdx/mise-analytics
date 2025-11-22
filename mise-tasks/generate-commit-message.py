@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a commit message with top 3 repos' stats."""
+"""Generate a commit message with top 5 repos' stats."""
 
 import pandas as pd
 from datetime import datetime
@@ -20,8 +20,8 @@ def main():
     latest_date = dates[-1]
     prev_date = dates[-2]
 
-    # Get top 3 repos by stars for the latest date
-    latest_df = df[df['date'] == latest_date].nlargest(3, 'github_stars')
+    # Get top 5 repos by stars for the latest date
+    latest_df = df[df['date'] == latest_date].nlargest(5, 'github_stars')
     prev_df = df[df['date'] == prev_date]
 
     # Build commit message
