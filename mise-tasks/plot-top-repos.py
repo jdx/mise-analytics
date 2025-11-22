@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 import numpy as np
+from scipy import stats
 
 # Read the CSV file
 df = pd.read_csv('top-repos.csv')
@@ -29,17 +30,42 @@ fig, ax = plt.subplots(figsize=(14, 6))
 # Define color palette for repos
 colors = plt.cm.tab10(np.linspace(0, 1, 10))
 
-# Calculate daily average for a repo
+# Calculate daily average for a repo using 30/90/180 day averaging
 def calc_daily_avg(repo_data):
-    """Calculate average stars per day"""
+    """Calculate average stars per day using 30/90/180 day timeframes"""
     if len(repo_data) < 2:
         return 0
-    first_stars = repo_data['github_stars'].iloc[0]
-    last_stars = repo_data['github_stars'].iloc[-1]
-    days = (repo_data['date'].iloc[-1] - repo_data['date'].iloc[0]).days
-    if days == 0:
+
+    # Calculate total days of data available
+    total_days = (repo_data['date'].max() - repo_data['date'].min()).days
+
+    daily_gains = []
+    timeframes = [30, 90, 180]
+
+    for days in timeframes:
+        # Skip timeframes longer than available data
+        if days > total_days:
+            continue
+
+        # Use specified days of data for calculation
+        cutoff_date = repo_data['date'].max() - pd.Timedelta(days=days)
+        recent_data = repo_data[repo_data['date'] >= cutoff_date].copy()
+
+        # Need at least 2 points for regression
+        if len(recent_data) < 2:
+            continue
+
+        # Convert dates to numbers for regression
+        x = (recent_data['date'] - recent_data['date'].min()).dt.days
+
+        # Get growth rate via linear regression
+        slope, intercept, _, _, _ = stats.linregress(x, recent_data['github_stars'])
+        daily_gains.append(slope)
+
+    # Return average of all valid timeframe calculations
+    if len(daily_gains) == 0:
         return 0
-    return (last_stars - first_stars) / days
+    return sum(daily_gains) / len(daily_gains)
 
 # Plot GitHub Stars for all top 10 repos
 for idx, repo in enumerate(repos[:10]):
