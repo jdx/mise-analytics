@@ -76,7 +76,7 @@ def build_repo_windows(df: pd.DataFrame):
         repo
         for repo, _ in sorted(
             growth_scores.items(), key=lambda item: (-item[1], item[0])
-        )[:3]
+        )[:5]
     ]
 
     return dates, top_repos, repo_data, growth_scores
