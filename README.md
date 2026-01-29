@@ -15,6 +15,10 @@
 
 ![mise Stats](charts/mise_stats.png)
 
+## fnox Stats
+
+![fnox Stats](charts/fnox_stats.png)
+
 ## hk Stats
 
 ![hk Stats](charts/hk_stats.png)
