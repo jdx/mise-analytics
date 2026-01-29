@@ -59,6 +59,10 @@ if len(df_pct) > 0:
     ax2.set_ylabel('Install % (of all Homebrew users)', fontsize=12, color='#3498DB')
     ax2.tick_params(axis='y', labelcolor='#3498DB')
     ax2.set_ylim(0, None)
+    ax2.axhline(y=0.76, color='#3498DB', linestyle=':', alpha=0.5)
+    ax2.annotate('0.76%', xy=(df_pct['date'].iloc[0], 0.76),
+                 xytext=(5, 5), textcoords='offset points',
+                 color='#3498DB', fontsize=9, alpha=0.7)
 
     # Combine legends from both axes
     lines1, labels1 = ax.get_legend_handles_labels()
