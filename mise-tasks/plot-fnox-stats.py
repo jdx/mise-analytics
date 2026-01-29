@@ -67,7 +67,6 @@ for name, info in active_competitors.items():
         info['data']['date'],
         info['data'][col],
         color=info['color'],
-        linestyle='--',
         label=f'{name} (+{info["avg"]:.1f}/day)'
     )
     info['line'] = line

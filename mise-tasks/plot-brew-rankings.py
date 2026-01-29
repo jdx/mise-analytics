@@ -38,8 +38,7 @@ for idx, repo in enumerate(repos[:10]):
             label=repo,
             marker='s',
             markersize=3,
-            linewidth=2,
-            linestyle='--'
+            linewidth=2
         )
 
 # Note: mise has its own dedicated brew ranking chart

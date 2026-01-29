@@ -58,21 +58,18 @@ line3 = ax.plot(
     df_comp[df_comp['precommit_stars'] > 0]['date'],
     df_comp[df_comp['precommit_stars'] > 0]['precommit_stars'],
     color=color3,
-    linestyle='--',
     label=f'pre-commit (+{precommit_avg:.1f}/day)'
 )
 line4 = ax.plot(
     df_comp[df_comp['prek_stars'] > 0]['date'],
     df_comp[df_comp['prek_stars'] > 0]['prek_stars'],
     color=color4,
-    linestyle='--',
     label=f'prek (+{prek_avg:.1f}/day)'
 )
 line5 = ax.plot(
     df_comp[df_comp['lefthook_stars'] > 0]['date'],
     df_comp[df_comp['lefthook_stars'] > 0]['lefthook_stars'],
     color=color5,
-    linestyle='--',
     label=f'lefthook (+{lefthook_avg:.1f}/day)'
 )
 

@@ -54,7 +54,6 @@ if len(df_pct) > 0:
         color='#3498DB',
         label='install %',
         linewidth=2,
-        linestyle='--',
         alpha=0.8
     )
     ax2.set_ylabel('Install % (of all Homebrew users)', fontsize=12, color='#3498DB')
