@@ -44,6 +44,7 @@ line2 = ax.plot(
     df_comp[df_comp['hk_stars'] > 0]['date'],
     df_comp[df_comp['hk_stars'] > 0]['hk_stars'],
     color=color2,
+    linewidth=5,
     label=f'hk (+{hk_avg:.1f}/day)'
 )
 

@@ -65,6 +65,7 @@ line2 = ax.plot(
     df['date'],
     df['github_stars'],
     color=color2,
+    linewidth=5,
     label=f'mise (+{mise_avg:.1f}/day)'
 )
 
