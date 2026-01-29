@@ -85,19 +85,19 @@ def fetch_stargazers_history(owner, repo, start_date=None, end_date=None):
 df = pd.read_csv('competitors.csv')
 df['date'] = pd.to_datetime(df['date'])
 
-# Add nixpkgs_stars column if it doesn't exist
-if 'nixpkgs_stars' not in df.columns:
-    df['nixpkgs_stars'] = 0
+# Add just_stars column if it doesn't exist
+if 'just_stars' not in df.columns:
+    df['just_stars'] = 0
 
 # Get date range from existing data (only where we have mise/asdf data)
 start_date = df['date'].min().strftime('%Y-%m-%d')
 end_date = (df['date'].max() - pd.Timedelta(days=1)).strftime('%Y-%m-%d')  # Yesterday, since today already has data
 
-print(f"Backfilling nixpkgs data from {start_date} to {end_date}", flush=True)
+print(f"Backfilling just data from {start_date} to {end_date}", flush=True)
 print(f"This aligns with existing mise/asdf data for performance", flush=True)
 
-# Fetch nixpkgs stargazer history
-daily_stars = fetch_stargazers_history('NixOS', 'nixpkgs', start_date, end_date)
+# Fetch just stargazer history
+daily_stars = fetch_stargazers_history('casey', 'just', start_date, end_date)
 
 # Convert to cumulative counts
 sorted_dates = sorted(daily_stars.keys())
@@ -108,23 +108,23 @@ for date in sorted_dates:
     cumulative += daily_stars[date]
     cumulative_by_date[date] = cumulative
 
-# Update dataframe with nixpkgs stars
+# Update dataframe with just stars
 for idx, row in df.iterrows():
     date_str = row['date'].strftime('%Y-%m-%d')
     if date_str in cumulative_by_date:
-        df.at[idx, 'nixpkgs_stars'] = cumulative_by_date[date_str]
+        df.at[idx, 'just_stars'] = cumulative_by_date[date_str]
     elif date_str < sorted_dates[0] if sorted_dates else '9999-99-99':
         # Before first star
-        df.at[idx, 'nixpkgs_stars'] = 0
+        df.at[idx, 'just_stars'] = 0
     else:
         # After our last fetched date, keep the last known value
         last_known = cumulative_by_date.get(sorted_dates[-1], 0) if sorted_dates else 0
-        df.at[idx, 'nixpkgs_stars'] = last_known
+        df.at[idx, 'just_stars'] = last_known
 
 # Sort by date and save
 df = df.sort_values('date')
 df.to_csv('competitors.csv', index=False)
 
-print(f"\nBackfilled {len(cumulative_by_date)} days of nixpkgs data")
-print(f"Current nixpkgs stars: {cumulative}")
+print(f"\nBackfilled {len(cumulative_by_date)} days of just data")
+print(f"Current just stars: {cumulative}")
 print(f"Total rows in competitors.csv: {len(df)}")

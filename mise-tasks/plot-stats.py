@@ -43,7 +43,7 @@ mise_current_stars = df['github_stars'].iloc[-1]
 # Define competitors with their colors
 competitors = {
     'asdf': {'color': '#8E44AD', 'data': None, 'avg': 0, 'line': None},   # Purple
-    'nixpkgs': {'color': '#3498DB', 'data': None, 'avg': 0, 'line': None}, # Blue
+    'just': {'color': '#3498DB', 'data': None, 'avg': 0, 'line': None}, # Blue
 }
 
 # Filter to only competitors that mise hasn't passed yet
