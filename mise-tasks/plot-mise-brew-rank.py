@@ -40,10 +40,33 @@ ax.set_ylim(max(current_ylim), 0)
 ax.set_ylabel('Homebrew Rank (lower is better)', fontsize=12)
 ax.set_xlabel('Date', fontsize=12)
 ax.set_title('mise Homebrew Ranking Over Time', fontsize=14, fontweight='bold')
-ax.legend(loc='upper right', fontsize=10)
 ax.grid(True, alpha=0.3)
 ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
 plt.xticks(rotation=45)
+
+# Plot brew_pct on secondary y-axis
+df_pct = df[df['brew_pct'].notna()]
+if len(df_pct) > 0:
+    ax2 = ax.twinx()
+    ax2.plot(
+        df_pct['date'],
+        df_pct['brew_pct'],
+        color='#3498DB',
+        label='install %',
+        linewidth=2,
+        linestyle='--',
+        alpha=0.8
+    )
+    ax2.set_ylabel('Install % (of all Homebrew users)', fontsize=12, color='#3498DB')
+    ax2.tick_params(axis='y', labelcolor='#3498DB')
+    ax2.set_ylim(0, None)
+
+    # Combine legends from both axes
+    lines1, labels1 = ax.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax.legend(lines1 + lines2, labels1 + labels2, loc='upper right', fontsize=10)
+else:
+    ax.legend(loc='upper right', fontsize=10)
 
 # Add annotation for current rank
 current_rank = df['brew_rank'].iloc[-1]
