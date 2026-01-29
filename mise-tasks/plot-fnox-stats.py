@@ -55,7 +55,7 @@ line2 = ax.plot(
     df_comp[df_comp['fnox_stars'] > 0]['date'],
     df_comp[df_comp['fnox_stars'] > 0]['fnox_stars'],
     color=color2,
-    linewidth=5,
+    linewidth=3,
     label=f'fnox (+{fnox_avg:.1f}/day)'
 )
 
