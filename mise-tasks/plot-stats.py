@@ -36,15 +36,30 @@ def calc_daily_avg(data, col_name):
     return (last_stars - first_stars) / days
 
 mise_avg = calc_daily_avg(df, 'github_stars')
-asdf_data = df_comp[df_comp['asdf_stars'] > 0]
-asdf_avg = calc_daily_avg(asdf_data, 'asdf_stars') if len(asdf_data) > 0 else 0
-nixpkgs_data = df_comp[df_comp['nixpkgs_stars'] > 0]
-nixpkgs_avg = calc_daily_avg(nixpkgs_data, 'nixpkgs_stars') if len(nixpkgs_data) > 0 else 0
+
+# Determine current mise stars to check which competitors to show
+mise_current_stars = df['github_stars'].iloc[-1]
+
+# Define competitors with their colors
+competitors = {
+    'asdf': {'color': '#8E44AD', 'data': None, 'avg': 0, 'line': None},   # Purple
+    'nixpkgs': {'color': '#3498DB', 'data': None, 'avg': 0, 'line': None}, # Blue
+}
+
+# Filter to only competitors that mise hasn't passed yet
+active_competitors = {}
+for name, info in competitors.items():
+    col = f'{name}_stars'
+    data = df_comp[df_comp[col] > 0]
+    if len(data) > 0:
+        current_stars = data[col].iloc[-1]
+        if current_stars > mise_current_stars:
+            info['data'] = data
+            info['avg'] = calc_daily_avg(data, col)
+            active_competitors[name] = info
 
 # Plot github_stars (will update label after predictions)
 color2 = '#E67E22'  # Orange
-color4 = '#8E44AD'  # Purple
-color5 = '#3498DB'  # Blue
 
 line2 = ax.plot(
     df['date'],
@@ -54,20 +69,18 @@ line2 = ax.plot(
 )
 
 # Filter out zero values before plotting
-line4 = ax.plot(
-    df_comp[df_comp['asdf_stars'] > 0]['date'],
-    df_comp[df_comp['asdf_stars'] > 0]['asdf_stars'],
-    color=color4,
-    linestyle='--',
-    label=f'asdf (+{asdf_avg:.1f}/day)'
-)
-line5 = ax.plot(
-    df_comp[df_comp['nixpkgs_stars'] > 0]['date'],
-    df_comp[df_comp['nixpkgs_stars'] > 0]['nixpkgs_stars'],
-    color=color5,
-    linestyle='--',
-    label=f'nixpkgs (+{nixpkgs_avg:.1f}/day)'
-)
+comp_lines = {}
+for name, info in active_competitors.items():
+    col = f'{name}_stars'
+    line = ax.plot(
+        info['data']['date'],
+        info['data'][col],
+        color=info['color'],
+        linestyle='--',
+        label=f'{name} (+{info["avg"]:.1f}/day)'
+    )
+    info['line'] = line
+    comp_lines[name] = line
 
 # Calculate crossing points
 def predict_crossing(df_comp, tool, days=30):
@@ -109,9 +122,10 @@ def predict_crossing(df_comp, tool, days=30):
     crossing_date = datetime.now() + pd.Timedelta(days=int(days_to_cross))
     return crossing_date, daily_gain
 
-# Calculate predictions for asdf and nixpkgs
+# Calculate predictions for active competitors
 prediction_labels = {}
-for tool, color in [('asdf', color4), ('nixpkgs', color5)]:
+for tool, info in active_competitors.items():
+    color = info['color']
     timeframes = [30, 90, 180]
     valid_predictions = []
     daily_gains = []
@@ -160,13 +174,12 @@ ax.xaxis.set_major_formatter(DateFormatter('%Y-%m-%d'))
 plt.xticks(rotation=45)
 
 # Update labels with predictions and create legend
-asdf_label = f'asdf (+{asdf_avg:.1f}/day)' + prediction_labels.get('asdf', '')
-nixpkgs_label = f'nixpkgs (+{nixpkgs_avg:.1f}/day)' + prediction_labels.get('nixpkgs', '')
+lines = line2
+for name, info in active_competitors.items():
+    label = f'{name} (+{info["avg"]:.1f}/day)' + prediction_labels.get(name, '')
+    info['line'][0].set_label(label)
+    lines = lines + info['line']
 
-line4[0].set_label(asdf_label)
-line5[0].set_label(nixpkgs_label)
-
-lines = line2 + line4 + line5
 labels = [line.get_label() for line in lines]
 ax.legend(lines, labels, loc='upper left')
 
