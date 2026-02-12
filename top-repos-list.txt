@@ -10,4 +10,4 @@ demand
 pitchfork
 expr.rs
 xx
-ruby
+mise-analytics
