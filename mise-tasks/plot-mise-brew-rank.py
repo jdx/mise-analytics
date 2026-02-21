@@ -67,9 +67,9 @@ if len(df_pct) > 0:
     # Combine legends from both axes
     lines1, labels1 = ax.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
-    ax.legend(lines1 + lines2, labels1 + labels2, loc='lower left', fontsize=10)
+    ax.legend(lines1 + lines2, labels1 + labels2, loc='lower right', fontsize=10)
 else:
-    ax.legend(loc='lower left', fontsize=10)
+    ax.legend(loc='lower right', fontsize=10)
 
 # Add annotation for current rank
 current_rank = df['brew_rank'].iloc[-1]
