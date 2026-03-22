@@ -6,7 +6,7 @@
 
 | Competitor | Expected Crossover | Days Until | mise lead gain (stars/day) |
 | --- | --- | --- | --- |
-| just | 2028-08-12 | 874 | 8.1 |
+| just | 2028-08-13 | 874 | 8.1 |
 
 <!-- END upcoming-crossovers -->
 
