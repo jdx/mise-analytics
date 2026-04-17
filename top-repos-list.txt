@@ -5,8 +5,8 @@ mise
 fnox
 hk
 usage
-mise-action
 pitchfork
+mise-action
 demand
 ruby
 expr.rs
