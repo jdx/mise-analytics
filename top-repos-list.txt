@@ -1,6 +1,7 @@
 # Top repos list - automatically managed
 # This list contains the current top 10 active repos (refreshed regularly)
 # Filters: excludes archived repos, forks, sample/demo projects, and repos not updated in >1 year
+# Entries may be either "repo" (assumed owned by jdx) or "owner/repo"
 mise
 fnox
 hk
@@ -11,3 +12,4 @@ demand
 ruby
 expr.rs
 communique
+endevco/aube

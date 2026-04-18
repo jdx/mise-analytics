@@ -6,6 +6,12 @@ GITHUB_USER="jdx"
 OUTPUT_FILE="top-repos.csv"
 REPOS_LIST_FILE="top-repos-list.txt"
 
+# Additional repos to always include, outside of jdx's top 10
+# Use the form "owner/repo"
+PINNED_REPOS=(
+    "endevco/aube"
+)
+
 # Initialize CSV if it doesn't exist
 if [ ! -f "$OUTPUT_FILE" ]; then
     echo "date,repo_name,github_stars,brew_rank,brew_installs,brew_pct" > "$OUTPUT_FILE"
@@ -30,28 +36,48 @@ CURRENT_TOP_10=$(echo "$ALL_REPOS" | jq -r --arg cutoff "$CUTOFF_DATE" '
     .name
 ' | head -10)
 
-# Replace the entire repos list with current top 10
+# Replace the entire repos list with current top 10 plus any pinned repos
 echo "# Top repos list - automatically managed" > "$REPOS_LIST_FILE"
 echo "# This list contains the current top 10 active repos (refreshed regularly)" >> "$REPOS_LIST_FILE"
 echo "# Filters: excludes archived repos, forks, sample/demo projects, and repos not updated in >1 year" >> "$REPOS_LIST_FILE"
+echo "# Entries may be either \"repo\" (assumed owned by jdx) or \"owner/repo\"" >> "$REPOS_LIST_FILE"
 for repo in $CURRENT_TOP_10; do
     echo "$repo" >> "$REPOS_LIST_FILE"
 done
+for repo in "${PINNED_REPOS[@]}"; do
+    echo "$repo" >> "$REPOS_LIST_FILE"
+done
 
-# Use current top 10 for processing
-TRACKED_REPOS="$CURRENT_TOP_10"
+# Use current top 10 plus pinned for processing
+TRACKED_REPOS="$CURRENT_TOP_10 ${PINNED_REPOS[*]}"
 
 # Fetch Homebrew analytics data once
 BREW_DATA=$(curl -s https://formulae.brew.sh/api/analytics/install-on-request/30d.json)
 
 # Process each tracked repo
-for repo in $TRACKED_REPOS; do
+for entry in $TRACKED_REPOS; do
     # Skip empty lines
-    [ -z "$repo" ] && continue
+    [ -z "$entry" ] && continue
+
+    # Support "owner/repo" entries; default owner to $GITHUB_USER otherwise
+    if [[ "$entry" == */* ]]; then
+        owner="${entry%%/*}"
+        repo="${entry##*/}"
+    else
+        owner="$GITHUB_USER"
+        repo="$entry"
+    fi
+
+    # For repos outside the default owner, record as "owner/repo" in the CSV
+    if [ "$owner" = "$GITHUB_USER" ]; then
+        repo_name="$repo"
+    else
+        repo_name="$owner/$repo"
+    fi
 
     # Get GitHub stars
     STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-           "https://api.github.com/repos/$GITHUB_USER/$repo" | \
+           "https://api.github.com/repos/$owner/$repo" | \
            jq '.stargazers_count')
 
     # Check if repo exists in Homebrew
@@ -70,7 +96,7 @@ for repo in $TRACKED_REPOS; do
     fi
 
     # Append to CSV
-    echo "$DATE,$repo,$STARS,$BREW_RANK,$BREW_INSTALLS,$BREW_PCT" >> "$OUTPUT_FILE"
+    echo "$DATE,$repo_name,$STARS,$BREW_RANK,$BREW_INSTALLS,$BREW_PCT" >> "$OUTPUT_FILE"
 done
 
 # Deduplicate entries (keep only latest entry per day per repo)

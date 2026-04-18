@@ -7,9 +7,24 @@ from datetime import datetime, timezone
 from collections import defaultdict
 from tqdm import tqdm
 
-async def fetch_stargazer_history(repo, session, pbar):
+DEFAULT_OWNER = 'jdx'
+
+
+def resolve_repo(entry):
+    """Return (owner, repo, repo_name) for an entry that may be "repo" or "owner/repo"."""
+    if '/' in entry:
+        owner, repo = entry.split('/', 1)
+        repo_name = entry if owner != DEFAULT_OWNER else repo
+    else:
+        owner, repo = DEFAULT_OWNER, entry
+        repo_name = entry
+    return owner, repo, repo_name
+
+
+async def fetch_stargazer_history(entry, session, pbar):
     """Fetch complete stargazer history for a single repo"""
     daily_stars = defaultdict(int)
+    owner, repo, _ = resolve_repo(entry)
 
     headers = {
         'Authorization': f'Bearer {os.environ["GITHUB_TOKEN"]}',
@@ -18,24 +33,24 @@ async def fetch_stargazer_history(repo, session, pbar):
 
     # Get total stars first
     async with session.get(
-        f'https://api.github.com/repos/jdx/{repo}',
+        f'https://api.github.com/repos/{owner}/{repo}',
         headers=headers
     ) as response:
         repo_data = await response.json()
         if 'stargazers_count' not in repo_data:
-            print(f"Warning: Could not fetch data for {repo}")
+            print(f"Warning: Could not fetch data for {entry}")
             pbar.total = 0
             return daily_stars
 
         total_stars = repo_data['stargazers_count']
         pbar.total = total_stars
-        pbar.set_description(f"Fetching {repo}")
+        pbar.set_description(f"Fetching {entry}")
 
     # Fetch all stargazers with timestamps
     page = 1
     while True:
         async with session.get(
-            f'https://api.github.com/repos/jdx/{repo}/stargazers'
+            f'https://api.github.com/repos/{owner}/{repo}/stargazers'
             f'?page={page}&per_page=100',
             headers=headers
         ) as response:
@@ -67,7 +82,7 @@ async def fetch_stargazer_history(repo, session, pbar):
                 if wait_time > 0:
                     pbar.set_description(f"Rate limited, waiting {int(wait_time)}s...")
                     await asyncio.sleep(wait_time + 1)
-                    pbar.set_description(f"Fetching {repo}")
+                    pbar.set_description(f"Fetching {entry}")
 
     return daily_stars
 
@@ -122,24 +137,25 @@ def main():
 
     # Build complete dataset with cumulative stars
     output_data = []
-    cumulative_stars = {repo: 0 for repo in repos}
+    cumulative_stars = {entry: 0 for entry in repos}
 
     for date in all_dates:
-        for repo in repos:
+        for entry in repos:
+            _, _, repo_name = resolve_repo(entry)
             # Update cumulative count
-            cumulative_stars[repo] += star_histories[repo].get(date, 0)
+            cumulative_stars[entry] += star_histories[entry].get(date, 0)
 
             # Check if we have existing data for this date/repo
-            if date in existing_data and repo in existing_data[date]:
+            if date in existing_data and repo_name in existing_data[date]:
                 # Use existing brew data, update stars
-                row = existing_data[date][repo].copy()
-                row['github_stars'] = str(cumulative_stars[repo])
+                row = existing_data[date][repo_name].copy()
+                row['github_stars'] = str(cumulative_stars[entry])
             else:
                 # Create new row with only star data
                 row = {
                     'date': date,
-                    'repo_name': repo,
-                    'github_stars': str(cumulative_stars[repo]),
+                    'repo_name': repo_name,
+                    'github_stars': str(cumulative_stars[entry]),
                     'brew_rank': '',
                     'brew_installs': '',
                     'brew_pct': ''
