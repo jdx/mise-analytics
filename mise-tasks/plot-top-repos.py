@@ -120,11 +120,11 @@ avg_stars = latest_data['github_stars'].mean()
 summary_text = f'Total Stars: {total_stars:,}\nAverage: {avg_stars:,.0f}'
 
 props = dict(boxstyle='round', facecolor='white', alpha=0.9, edgecolor='gray')
-ax.text(0.98, 0.02, summary_text,
+ax.text(0.02, 0.02, summary_text,
         transform=ax.transAxes,
         fontsize=10,
         verticalalignment='bottom',
-        horizontalalignment='right',
+        horizontalalignment='left',
         bbox=props)
 
 # Adjust layout to prevent label cutoff

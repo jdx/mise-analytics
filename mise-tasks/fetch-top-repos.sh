@@ -26,6 +26,7 @@ done
 # Filter: exclude archived repos, forks, sample projects, and those not updated in >1 year
 # Calculate cutoff date as 1 year ago from today
 CUTOFF_DATE=$(date -u -v-1y '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || date -u -d '1 year ago' '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || echo "2024-10-26T00:00:00Z")
+# Track top 11 so the chart (which excludes mise) still shows 10 repos
 CURRENT_TOP_10=$(echo "$ALL_REPOS" | jq -r --arg cutoff "$CUTOFF_DATE" '
     sort_by(-.stargazers_count) |
     .[] |
@@ -36,11 +37,12 @@ CURRENT_TOP_10=$(echo "$ALL_REPOS" | jq -r --arg cutoff "$CUTOFF_DATE" '
         (.name | test("sample|demo|example"; "i") | not)
     ) |
     .full_name
-' | head -10)
+' | head -11)
 
-# Replace the entire repos list with current top 10 across tracked accounts
+# Replace the entire repos list with current top 11 across tracked accounts
 echo "# Top repos list - automatically managed" > "$REPOS_LIST_FILE"
-echo "# Top 10 active repos across tracked accounts (${GITHUB_USERS[*]}), refreshed regularly" >> "$REPOS_LIST_FILE"
+echo "# Top 11 active repos across tracked accounts (${GITHUB_USERS[*]}), refreshed regularly" >> "$REPOS_LIST_FILE"
+echo "# The chart excludes mise and shows the remaining 10" >> "$REPOS_LIST_FILE"
 echo "# Filters: excludes archived repos, forks, sample/demo projects, and repos not updated in >1 year" >> "$REPOS_LIST_FILE"
 echo "# Entries use \"owner/repo\" format (bare \"repo\" is also accepted and assumed owned by $DEFAULT_OWNER)" >> "$REPOS_LIST_FILE"
 for repo in $CURRENT_TOP_10; do

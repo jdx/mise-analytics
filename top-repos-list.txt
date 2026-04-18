@@ -1,5 +1,6 @@
 # Top repos list - automatically managed
-# Top 10 active repos across tracked accounts (jdx endevco), refreshed regularly
+# Top 11 active repos across tracked accounts (jdx endevco), refreshed regularly
+# The chart excludes mise and shows the remaining 10
 # Filters: excludes archived repos, forks, sample/demo projects, and repos not updated in >1 year
 # Entries use "owner/repo" format (bare "repo" is also accepted and assumed owned by jdx)
 jdx/mise
@@ -12,3 +13,4 @@ jdx/demand
 jdx/ruby
 jdx/expr.rs
 jdx/communique
+jdx/xx
