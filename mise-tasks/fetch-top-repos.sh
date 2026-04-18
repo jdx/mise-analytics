@@ -2,24 +2,26 @@
 set -exuo pipefail
 
 DATE=$(date '+%Y-%m-%d')
-GITHUB_USER="jdx"
+# Accounts scanned for the top 10. Top 10 is computed across the union.
+GITHUB_USERS=("jdx" "endevco")
+# Default owner used when an entry has no "owner/" prefix; kept for back-compat
+# with older CSV rows that used the bare repo name.
+DEFAULT_OWNER="jdx"
 OUTPUT_FILE="top-repos.csv"
 REPOS_LIST_FILE="top-repos-list.txt"
-
-# Additional repos to always include, outside of jdx's top 10
-# Use the form "owner/repo"
-PINNED_REPOS=(
-    "endevco/aube"
-)
 
 # Initialize CSV if it doesn't exist
 if [ ! -f "$OUTPUT_FILE" ]; then
     echo "date,repo_name,github_stars,brew_rank,brew_installs,brew_pct" > "$OUTPUT_FILE"
 fi
 
-# Get current top repos from GitHub, filtering out archived and old projects
-ALL_REPOS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-    "https://api.github.com/users/$GITHUB_USER/repos?per_page=100&sort=updated")
+# Fetch repos for each tracked account, then merge into a single JSON array
+ALL_REPOS="[]"
+for user in "${GITHUB_USERS[@]}"; do
+    user_repos=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+        "https://api.github.com/users/$user/repos?per_page=100&sort=updated")
+    ALL_REPOS=$(jq -s '.[0] + .[1]' <(echo "$ALL_REPOS") <(echo "$user_repos"))
+done
 
 # Filter: exclude archived repos, forks, sample projects, and those not updated in >1 year
 # Calculate cutoff date as 1 year ago from today
@@ -33,23 +35,19 @@ CURRENT_TOP_10=$(echo "$ALL_REPOS" | jq -r --arg cutoff "$CUTOFF_DATE" '
         .pushed_at > $cutoff and
         (.name | test("sample|demo|example"; "i") | not)
     ) |
-    .name
+    .full_name
 ' | head -10)
 
-# Replace the entire repos list with current top 10 plus any pinned repos
+# Replace the entire repos list with current top 10 across tracked accounts
 echo "# Top repos list - automatically managed" > "$REPOS_LIST_FILE"
-echo "# This list contains the current top 10 active repos (refreshed regularly)" >> "$REPOS_LIST_FILE"
+echo "# Top 10 active repos across tracked accounts (${GITHUB_USERS[*]}), refreshed regularly" >> "$REPOS_LIST_FILE"
 echo "# Filters: excludes archived repos, forks, sample/demo projects, and repos not updated in >1 year" >> "$REPOS_LIST_FILE"
-echo "# Entries may be either \"repo\" (assumed owned by jdx) or \"owner/repo\"" >> "$REPOS_LIST_FILE"
+echo "# Entries use \"owner/repo\" format (bare \"repo\" is also accepted and assumed owned by $DEFAULT_OWNER)" >> "$REPOS_LIST_FILE"
 for repo in $CURRENT_TOP_10; do
     echo "$repo" >> "$REPOS_LIST_FILE"
 done
-for repo in "${PINNED_REPOS[@]}"; do
-    echo "$repo" >> "$REPOS_LIST_FILE"
-done
 
-# Use current top 10 plus pinned for processing
-TRACKED_REPOS="$CURRENT_TOP_10 ${PINNED_REPOS[*]}"
+TRACKED_REPOS="$CURRENT_TOP_10"
 
 # Fetch Homebrew analytics data once
 BREW_DATA=$(curl -s https://formulae.brew.sh/api/analytics/install-on-request/30d.json)
@@ -59,17 +57,17 @@ for entry in $TRACKED_REPOS; do
     # Skip empty lines
     [ -z "$entry" ] && continue
 
-    # Support "owner/repo" entries; default owner to $GITHUB_USER otherwise
+    # Support "owner/repo" entries; default owner to $DEFAULT_OWNER otherwise
     if [[ "$entry" == */* ]]; then
         owner="${entry%%/*}"
         repo="${entry##*/}"
     else
-        owner="$GITHUB_USER"
+        owner="$DEFAULT_OWNER"
         repo="$entry"
     fi
 
     # For repos outside the default owner, record as "owner/repo" in the CSV
-    if [ "$owner" = "$GITHUB_USER" ]; then
+    if [ "$owner" = "$DEFAULT_OWNER" ]; then
         repo_name="$repo"
     else
         repo_name="$owner/$repo"

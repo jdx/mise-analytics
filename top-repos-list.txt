@@ -1,15 +1,14 @@
 # Top repos list - automatically managed
-# This list contains the current top 10 active repos (refreshed regularly)
+# Top 10 active repos across tracked accounts (jdx endevco), refreshed regularly
 # Filters: excludes archived repos, forks, sample/demo projects, and repos not updated in >1 year
-# Entries may be either "repo" (assumed owned by jdx) or "owner/repo"
-mise
-fnox
-hk
-usage
-pitchfork
-mise-action
-demand
-ruby
-expr.rs
-communique
-endevco/aube
+# Entries use "owner/repo" format (bare "repo" is also accepted and assumed owned by jdx)
+jdx/mise
+jdx/fnox
+jdx/hk
+jdx/usage
+jdx/pitchfork
+jdx/mise-action
+jdx/demand
+jdx/ruby
+jdx/expr.rs
+jdx/communique

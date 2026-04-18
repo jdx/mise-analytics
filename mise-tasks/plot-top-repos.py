@@ -6,6 +6,25 @@ from matplotlib.dates import DateFormatter
 import numpy as np
 from scipy import stats
 
+DEFAULT_OWNER = 'jdx'
+
+
+def read_tracked_repo_names():
+    """Read current tracked repos from top-repos-list.txt, normalized to CSV repo_name."""
+    names = []
+    with open('top-repos-list.txt', 'r') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            if '/' in line:
+                owner, repo = line.split('/', 1)
+                names.append(repo if owner == DEFAULT_OWNER else line)
+            else:
+                names.append(line)
+    return names
+
+
 # Read the CSV file
 df = pd.read_csv('top-repos.csv')
 
@@ -16,6 +35,11 @@ df['date'] = pd.to_datetime(df['date'])
 from datetime import datetime, timedelta
 two_years_ago = datetime.now() - timedelta(days=730)
 df = df[df['date'] >= two_years_ago]
+
+# Restrict to the currently tracked top 10 (excludes historical rows for
+# repos that dropped off the list)
+tracked = read_tracked_repo_names()
+df = df[df['repo_name'].isin(tracked)]
 
 # Exclude mise from top-repos visualization (but keep in CSV)
 df = df[df['repo_name'] != 'mise']
