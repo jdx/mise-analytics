@@ -10,7 +10,7 @@ jdx/usage
 jdx/pitchfork
 jdx/mise-action
 jdx/demand
+endevco/aube
 jdx/ruby
 jdx/expr.rs
 jdx/communique
-jdx/xx
