@@ -89,17 +89,24 @@ def format_table(dates, top_repos, repo_data) -> str:
 
     lines = ["| " + " | ".join(header_cells) + " |"]
     lines.append("| " + " | ".join(["---"] * len(header_cells)) + " |")
+    previous_values = {repo: None for repo in top_repos}
 
     for date in dates:
         row = [date.strftime("%Y-%m-%d")]
         for repo in top_repos:
-            series, deltas = repo_data[repo]
+            series, _deltas = repo_data[repo]
             stars_value = series.loc[date]
-            delta_value = deltas.loc[date]
             if pd.isna(stars_value):
                 row.append("—")
             else:
-                row.append(f"{int(stars_value):,d} ({int(delta_value):+d})")
+                current_value = int(stars_value)
+                previous_value = previous_values[repo]
+                if previous_value is None:
+                    row.append(f"{current_value:,d}")
+                else:
+                    delta_value = current_value - previous_value
+                    row.append(f"{current_value:,d} ({delta_value:+d})")
+                previous_values[repo] = current_value
         lines.append("| " + " | ".join(row) + " |")
 
     return "\n".join(lines)
