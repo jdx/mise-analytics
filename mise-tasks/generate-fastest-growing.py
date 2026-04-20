@@ -57,14 +57,14 @@ def build_repo_windows(df: pd.DataFrame):
             continue
 
         repo_series = repo_series.reindex(dates)
-        repo_series = repo_series.ffill().bfill()
+        repo_series = repo_series.ffill()
 
         if repo_series.isna().all():
             continue
 
-        repo_series = repo_series.astype(int)
-        deltas = repo_series.diff().fillna(0).astype(int)
-        growth = int(repo_series.iloc[-1] - repo_series.iloc[0])
+        deltas = repo_series.diff().fillna(0)
+        observed_values = repo_series.dropna()
+        growth = int(observed_values.iloc[-1] - observed_values.iloc[0])
 
         repo_data[repo] = (repo_series, deltas)
         growth_scores[repo] = growth
@@ -96,7 +96,10 @@ def format_table(dates, top_repos, repo_data) -> str:
             series, deltas = repo_data[repo]
             stars_value = series.loc[date]
             delta_value = deltas.loc[date]
-            row.append(f"{stars_value:,d} ({delta_value:+d})")
+            if pd.isna(stars_value):
+                row.append("—")
+            else:
+                row.append(f"{int(stars_value):,d} ({int(delta_value):+d})")
         lines.append("| " + " | ".join(row) + " |")
 
     return "\n".join(lines)
