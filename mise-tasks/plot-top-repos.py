@@ -86,9 +86,14 @@ def calc_daily_avg(repo_data):
         slope, intercept, _, _, _ = stats.linregress(x, recent_data['github_stars'])
         daily_gains.append(slope)
 
-    # Return average of all valid timeframe calculations
+    # For newly tracked repos with less than 30 days of history, fall back to
+    # the full available window instead of showing 0.0/day.
     if len(daily_gains) == 0:
-        return 0
+        x = (repo_data['date'] - repo_data['date'].min()).dt.days
+        slope, intercept, _, _, _ = stats.linregress(x, repo_data['github_stars'])
+        return slope
+
+    # Return average of all valid timeframe calculations
     return sum(daily_gains) / len(daily_gains)
 
 # Plot GitHub Stars for all top 10 repos
