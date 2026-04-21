@@ -7,9 +7,9 @@ jdx/mise
 jdx/fnox
 jdx/hk
 jdx/usage
+endevco/aube
 jdx/pitchfork
 jdx/mise-action
-endevco/aube
 jdx/demand
 jdx/ruby
 jdx/expr.rs
