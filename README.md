@@ -22,6 +22,10 @@
 
 ![hk Stats](charts/hk_stats.png)
 
+## aube Stats
+
+![aube Stats](charts/aube_stats.png)
+
 ## Top Repos Stats
 
 ![Top Repos Stats](charts/top_repos_stats.png)

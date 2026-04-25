@@ -27,12 +27,14 @@ jobs:
           mise run fetch-stats
           mise run fetch-competitors
           mise run fetch-hk-competitors
+          mise run fetch-aube-competitors
           mise run fetch-top-repos
 
       - name: Generate plots
         run: |
           mise run plot-stats
           mise run plot-hk-stats
+          mise run plot-aube-stats
           mise run plot-top-repos
           mise run plot-brew-rankings
           mise run plot-mise-brew-rank
