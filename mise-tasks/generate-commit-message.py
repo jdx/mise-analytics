@@ -20,26 +20,24 @@ def main():
     latest_date = dates[-1]
     prev_date = dates[-2]
 
-    # Get top 3 repos by stars for the latest date
-    latest_df = df[df['date'] == latest_date].nlargest(3, 'github_stars')
-    prev_df = df[df['date'] == prev_date]
+    # Pick the 3 repos with the largest day-over-day star gain.
+    latest_df = df[df['date'] == latest_date][['repo_name', 'github_stars']]
+    prev_df = df[df['date'] == prev_date][['repo_name', 'github_stars']].rename(
+        columns={'github_stars': 'prev_stars'}
+    )
+    merged = latest_df.merge(prev_df, on='repo_name', how='left')
+    merged['prev_stars'] = merged['prev_stars'].fillna(merged['github_stars'])
+    merged['delta'] = merged['github_stars'] - merged['prev_stars']
+    top = merged.sort_values(
+        by=['delta', 'github_stars'], ascending=[False, False]
+    ).head(3)
 
-    # Build commit message
     parts = []
-    for _, row in latest_df.iterrows():
-        repo = row['repo_name']
+    for _, row in top.iterrows():
         stars = int(row['github_stars'])
-
-        # Get previous stars
-        prev_row = prev_df[prev_df['repo_name'] == repo]
-        if not prev_row.empty:
-            prev_stars = int(prev_row.iloc[0]['github_stars'])
-            delta = stars - prev_stars
-            delta_str = f"+{delta}" if delta > 0 else str(delta)
-        else:
-            delta_str = "+0"
-
-        parts.append(f"{repo}: {stars:,} ({delta_str})")
+        delta = int(row['delta'])
+        delta_str = f"+{delta}" if delta >= 0 else str(delta)
+        parts.append(f"{row['repo_name']}: {stars:,} ({delta_str})")
 
     # Format the commit message
     message = f"update stats: {', '.join(parts)}"
