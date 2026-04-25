@@ -6,7 +6,7 @@
 
 | Competitor | Expected Crossover | Days Until | mise lead gain (stars/day) |
 | --- | --- | --- | --- |
-| just | 2028-08-13 | 841 | 7.3 |
+| just | 2028-07-13 | 810 | 7.6 |
 
 <!-- END upcoming-crossovers -->
 
@@ -38,12 +38,11 @@
 
 <!-- START fastest-growing -->
 
-Data window: 2026-03-26 → 2026-04-24 (UTC)
+Data window: 2026-03-27 → 2026-04-25 (UTC)
 
 | Date | mise | endevco/aube | fnox | pitchfork | hk |
 | --- | --- | --- | --- | --- | --- |
-| 2026-03-26 | 26,038 | — | 1,350 | 231 | 697 |
-| 2026-03-27 | 26,081 (+43) | — | 1,354 (+4) | 231 (+0) | 698 (+1) |
+| 2026-03-27 | 26,081 | — | 1,354 | 231 | 698 |
 | 2026-03-28 | 26,106 (+25) | — | 1,358 (+4) | 233 (+2) | 700 (+2) |
 | 2026-03-29 | 26,132 (+26) | — | 1,359 (+1) | 233 (+0) | 701 (+1) |
 | 2026-03-30 | 26,163 (+31) | — | 1,360 (+1) | 235 (+2) | 706 (+5) |
@@ -72,11 +71,12 @@ Data window: 2026-03-26 → 2026-04-24 (UTC)
 | 2026-04-22 | 27,050 (+53) | 357 (+25) | 1,486 (+4) | 294 (+4) | 764 (+2) |
 | 2026-04-23 | 27,097 (+47) | 382 (+25) | 1,492 (+6) | 297 (+3) | 765 (+1) |
 | 2026-04-24 | 27,153 (+56) | 481 (+99) | 1,503 (+11) | 304 (+7) | 768 (+3) |
+| 2026-04-25 | 27,203 (+50) | 550 (+69) | 1,509 (+6) | 308 (+4) | 774 (+6) |
 
-- `mise` grew by +1,115 stars
-- `endevco/aube` grew by +437 stars
-- `fnox` grew by +153 stars
-- `pitchfork` grew by +73 stars
-- `hk` grew by +71 stars
+- `mise` grew by +1,122 stars
+- `endevco/aube` grew by +506 stars
+- `fnox` grew by +155 stars
+- `pitchfork` grew by +77 stars
+- `hk` grew by +76 stars
 
 <!-- END fastest-growing -->
