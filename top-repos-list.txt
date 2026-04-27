@@ -8,9 +8,9 @@ jdx/fnox
 jdx/hk
 jdx/usage
 endevco/aube
-jdx/pitchfork
+endevco/pitchfork
 jdx/mise-action
 jdx/demand
-jdx/ruby
 jdx/communique
+jdx/ruby
 jdx/expr.rs
