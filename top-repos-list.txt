@@ -6,8 +6,8 @@
 jdx/mise
 jdx/fnox
 jdx/hk
-jdx/usage
 endevco/aube
+jdx/usage
 endevco/pitchfork
 jdx/mise-action
 jdx/demand
