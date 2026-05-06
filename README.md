@@ -30,6 +30,10 @@
 
 ![Top Repos Stats](charts/top_repos_stats.png)
 
+## Top Repos Downloads
+
+![Top Repos Downloads](charts/top_repos_downloads.png)
+
 ## Homebrew Rankings
 
 ![Homebrew Rankings](charts/brew_rankings.png)
