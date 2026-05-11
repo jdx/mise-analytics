@@ -150,7 +150,6 @@ if predictions:
 
 ax.set_ylabel('GitHub Stars', fontsize=12)
 ax.set_xlabel('Date', fontsize=12)
-ax.set_yscale('log')
 ax.grid(True, which='both', alpha=0.3)
 ax.set_xlim(df_comp['date'].min(), df_comp['date'].max() + pd.Timedelta(days=730))
 plt.title('aube: GitHub Stars vs Package Manager Competitors', fontsize=14, fontweight='bold')
