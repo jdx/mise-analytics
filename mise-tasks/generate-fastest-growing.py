@@ -112,8 +112,10 @@ def format_table(dates, top_repos, repo_data) -> str:
     return "\n".join(lines)
 
 
-def predict_crossing(df_comp: pd.DataFrame, tool: str, days: int = 90):
-    if df_comp.empty or f"{tool}_stars" not in df_comp.columns:
+def predict_crossing(df_comp: pd.DataFrame, focal: str, tool: str, days: int = 90):
+    focal_col = f"{focal}_stars"
+    tool_col = f"{tool}_stars"
+    if df_comp.empty or focal_col not in df_comp.columns or tool_col not in df_comp.columns:
         return None
 
     cutoff_date = df_comp["date"].max() - pd.Timedelta(days=days)
@@ -123,26 +125,26 @@ def predict_crossing(df_comp: pd.DataFrame, tool: str, days: int = 90):
         return None
 
     x = (recent_data["date"] - recent_data["date"].min()).dt.days
-    mise_series = recent_data["mise_stars"].astype(float)
-    tool_series = recent_data[f"{tool}_stars"].astype(float)
+    focal_series = recent_data[focal_col].astype(float)
+    tool_series = recent_data[tool_col].astype(float)
 
-    if len(x.unique()) < 2 or mise_series.nunique() <= 1 or tool_series.nunique() <= 1:
+    if len(x.unique()) < 2 or focal_series.nunique() <= 1 or tool_series.nunique() <= 1:
         return None
 
-    mise_slope, _, _, _, _ = stats.linregress(x, mise_series)
+    focal_slope, _, _, _, _ = stats.linregress(x, focal_series)
     tool_slope, _, _, _, _ = stats.linregress(x, tool_series)
 
-    if mise_slope <= tool_slope:
+    if focal_slope <= tool_slope:
         return None
 
-    mise_current = df_comp["mise_stars"].iloc[-1]
-    tool_current = df_comp[f"{tool}_stars"].iloc[-1]
+    focal_current = df_comp[focal_col].iloc[-1]
+    tool_current = df_comp[tool_col].iloc[-1]
 
-    if mise_current >= tool_current:
-        return datetime.now(UTC), mise_slope - tool_slope
+    if focal_current >= tool_current:
+        return datetime.now(UTC), focal_slope - tool_slope
 
-    stars_diff = tool_current - mise_current
-    daily_gain = mise_slope - tool_slope
+    stars_diff = tool_current - focal_current
+    daily_gain = focal_slope - tool_slope
 
     if daily_gain <= 0:
         return None
@@ -156,9 +158,10 @@ def predict_crossing(df_comp: pd.DataFrame, tool: str, days: int = 90):
     return crossing_date, daily_gain
 
 
-def build_upcoming_crossovers(df_comp: pd.DataFrame) -> str:
-    if df_comp.empty or "mise_stars" not in df_comp.columns:
-        return "No competitor data available."
+def collect_crossovers(df_comp: pd.DataFrame, focal: str) -> list[dict]:
+    focal_col = f"{focal}_stars"
+    if df_comp.empty or focal_col not in df_comp.columns:
+        return []
 
     df_comp = df_comp.copy()
     df_comp["date"] = pd.to_datetime(df_comp["date"], errors="coerce")
@@ -167,20 +170,19 @@ def build_upcoming_crossovers(df_comp: pd.DataFrame) -> str:
     competitor_cols = [
         col
         for col in df_comp.columns
-        if col.endswith("_stars") and col not in {"mise_stars"}
+        if col.endswith("_stars") and col != focal_col
     ]
     competitors = [col.replace("_stars", "") for col in competitor_cols]
 
     predictions = []
 
     for comp in competitors:
-        # Calculate predictions for multiple timeframes like the chart does
         timeframes = [30, 90, 180]
         valid_predictions = []
         daily_gains = []
 
         for days in timeframes:
-            result = predict_crossing(df_comp, comp, days=days)
+            result = predict_crossing(df_comp, focal, comp, days=days)
             if result:
                 cross_date, daily_gain = result
                 valid_predictions.append(cross_date)
@@ -189,7 +191,6 @@ def build_upcoming_crossovers(df_comp: pd.DataFrame) -> str:
         if not valid_predictions:
             continue
 
-        # Calculate average prediction
         total_timedelta = sum(
             (d - valid_predictions[0] for d in valid_predictions[1:]),
             timedelta(0)
@@ -204,6 +205,7 @@ def build_upcoming_crossovers(df_comp: pd.DataFrame) -> str:
 
         predictions.append(
             {
+                "project": focal,
                 "competitor": comp,
                 "cross_date": avg_date,
                 "days_until": days_until,
@@ -211,19 +213,24 @@ def build_upcoming_crossovers(df_comp: pd.DataFrame) -> str:
             }
         )
 
+    return predictions
+
+
+def build_upcoming_crossovers(predictions: list[dict]) -> str:
     if not predictions:
         return "No upcoming crossovers predicted."
 
-    predictions.sort(key=lambda item: item["cross_date"])
+    predictions = sorted(predictions, key=lambda item: item["cross_date"])
 
     lines = [
-        "| Competitor | Expected Crossover | Days Until | mise lead gain (stars/day) |",
-        "| --- | --- | --- | --- |",
+        "| Project | Competitor | Expected Crossover | Days Until | lead gain (stars/day) |",
+        "| --- | --- | --- | --- | --- |",
     ]
 
-    for pred in predictions[:5]:
+    for pred in predictions:
         lines.append(
-            "| {competitor} | {date} | {days} | {gain:.1f} |".format(
+            "| {project} | {competitor} | {date} | {days} | {gain:.1f} |".format(
+                project=pred["project"],
                 competitor=pred["competitor"],
                 date=pred["cross_date"].strftime("%Y-%m-%d"),
                 days=pred["days_until"],
@@ -316,8 +323,16 @@ def update_readme(crossover_section: str, fastest_section: str) -> None:
 
 def main() -> None:
     df = load_repo_history(Path("top-repos.csv"))
-    competitors_df = pd.read_csv("competitors.csv")
-    crossovers = build_upcoming_crossovers(competitors_df)
+    predictions = []
+    for csv_path, focal in [
+        ("competitors.csv", "mise"),
+        ("aube-competitors.csv", "aube"),
+    ]:
+        path = Path(csv_path)
+        if not path.exists():
+            continue
+        predictions.extend(collect_crossovers(pd.read_csv(path), focal))
+    crossovers = build_upcoming_crossovers(predictions)
     dates, top_repos, repo_data, growth_scores = build_repo_windows(df)
     crossover_section, fastest_section = build_sections(
         dates, top_repos, repo_data, growth_scores, crossovers
