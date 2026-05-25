@@ -6,10 +6,10 @@
 
 | Project | Competitor | Expected Crossover | Days Until | lead gain (stars/day) |
 | --- | --- | --- | --- | --- |
-| mise | just | 2027-07-01 | 402 | 15.3 |
-| aube | npm | 2028-01-01 | 586 | 15.8 |
-| aube | berry | 2029-01-22 | 973 | 12.9 |
-| aube | yarn | 2032-08-12 | 2271 | 18.6 |
+| mise | just | 2027-06-27 | 397 | 15.2 |
+| aube | npm | 2027-12-28 | 581 | 15.7 |
+| aube | berry | 2028-12-20 | 939 | 12.8 |
+| aube | yarn | 2032-08-03 | 2261 | 18.4 |
 
 <!-- END upcoming-crossovers -->
 
@@ -49,12 +49,11 @@
 
 <!-- START fastest-growing -->
 
-Data window: 2026-04-25 → 2026-05-24 (UTC)
+Data window: 2026-04-26 → 2026-05-25 (UTC)
 
 | Date | mise | endevco/aube | fnox | hk | endevco/pitchfork |
 | --- | --- | --- | --- | --- | --- |
-| 2026-04-25 | 27,203 | 550 | 1,509 | 774 | — |
-| 2026-04-26 | 27,259 (+56) | 583 (+33) | 1,512 (+3) | 782 (+8) | — |
+| 2026-04-26 | 27,259 | 583 | 1,512 | 782 | — |
 | 2026-04-27 | 27,301 (+42) | 613 (+30) | 1,522 (+10) | 786 (+4) | 321 |
 | 2026-04-28 | 27,363 (+62) | 639 (+26) | 1,547 (+25) | 789 (+3) | 325 (+4) |
 | 2026-04-29 | 27,406 (+43) | 672 (+33) | 1,559 (+12) | 793 (+4) | 337 (+12) |
@@ -83,11 +82,12 @@ Data window: 2026-04-25 → 2026-05-24 (UTC)
 | 2026-05-22 | 28,485 (+51) | 1,173 (+7) | 1,706 (+4) | 867 (+2) | 397 (+1) |
 | 2026-05-23 | 28,519 (+34) | 1,178 (+5) | 1,707 (+1) | 868 (+1) | 397 (+0) |
 | 2026-05-24 | 28,543 (+24) | 1,191 (+13) | 1,712 (+5) | 869 (+1) | 401 (+4) |
+| 2026-05-25 | 28,604 (+61) | 1,199 (+8) | 1,716 (+4) | 871 (+2) | 403 (+2) |
 
-- `mise` grew by +1,340 stars
-- `endevco/aube` grew by +641 stars
-- `fnox` grew by +203 stars
-- `hk` grew by +95 stars
-- `endevco/pitchfork` grew by +80 stars
+- `mise` grew by +1,345 stars
+- `endevco/aube` grew by +616 stars
+- `fnox` grew by +204 stars
+- `hk` grew by +89 stars
+- `endevco/pitchfork` grew by +82 stars
 
 <!-- END fastest-growing -->
