@@ -8,13 +8,23 @@ from collections import defaultdict
 from tqdm import tqdm
 
 DEFAULT_OWNER = 'jdx'
+CANONICAL_REPOS = {
+    'endevco/aube': 'jdx/aube',
+    'endevco/pitchfork': 'jdx/pitchfork',
+}
+
+
+def canonical_repo_name(owner, repo):
+    canonical = CANONICAL_REPOS.get(f'{owner}/{repo}', f'{owner}/{repo}')
+    canonical_owner, canonical_repo = canonical.split('/', 1)
+    return canonical_repo if canonical_owner == DEFAULT_OWNER else canonical
 
 
 def resolve_repo(entry):
     """Return (owner, repo, repo_name) for an entry that may be "repo" or "owner/repo"."""
     if '/' in entry:
         owner, repo = entry.split('/', 1)
-        repo_name = entry if owner != DEFAULT_OWNER else repo
+        repo_name = canonical_repo_name(owner, repo)
     else:
         owner, repo = DEFAULT_OWNER, entry
         repo_name = entry

@@ -7,6 +7,16 @@ import numpy as np
 from scipy import stats
 
 DEFAULT_OWNER = 'jdx'
+CANONICAL_REPOS = {
+    'endevco/aube': 'jdx/aube',
+    'endevco/pitchfork': 'jdx/pitchfork',
+}
+
+
+def canonical_repo_name(owner, repo):
+    canonical = CANONICAL_REPOS.get(f'{owner}/{repo}', f'{owner}/{repo}')
+    canonical_owner, canonical_repo = canonical.split('/', 1)
+    return canonical_repo if canonical_owner == DEFAULT_OWNER else canonical
 
 
 def read_tracked_repo_names():
@@ -19,7 +29,7 @@ def read_tracked_repo_names():
                 continue
             if '/' in line:
                 owner, repo = line.split('/', 1)
-                names.append(repo if owner == DEFAULT_OWNER else line)
+                names.append(canonical_repo_name(owner, repo))
             else:
                 names.append(line)
     return names

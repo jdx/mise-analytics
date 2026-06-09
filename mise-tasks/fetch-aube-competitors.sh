@@ -14,7 +14,7 @@ fetch_stars() {
         "https://api.github.com/repos/$1" | jq '.stargazers_count'
 }
 
-AUBE_STARS=$(fetch_stars endevco/aube)
+AUBE_STARS=$(fetch_stars jdx/aube)
 VLT_STARS=$(fetch_stars vltpkg/vltpkg)
 NPM_STARS=$(fetch_stars npm/cli)
 PNPM_STARS=$(fetch_stars pnpm/pnpm)

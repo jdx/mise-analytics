@@ -5,10 +5,10 @@
 # Entries use "owner/repo" format (bare "repo" is also accepted and assumed owned by jdx)
 jdx/mise
 jdx/fnox
-endevco/aube
+jdx/aube
 jdx/hk
 jdx/usage
-endevco/pitchfork
+jdx/pitchfork
 jdx/mise-action
 jdx/demand
 jdx/communique

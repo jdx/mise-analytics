@@ -11,15 +11,25 @@ from pathlib import Path
 import requests
 
 DEFAULT_OWNER = "jdx"
+CANONICAL_REPOS = {
+    "endevco/aube": "jdx/aube",
+    "endevco/pitchfork": "jdx/pitchfork",
+}
 REPO_ROOT = Path(__file__).resolve().parent.parent
 REPOS_LIST_FILE = REPO_ROOT / "top-repos-list.txt"
 OUTPUT_FILE = REPO_ROOT / "top-repos-downloads.csv"
 
 
+def canonical_repo_name(owner, repo):
+    canonical = CANONICAL_REPOS.get(f"{owner}/{repo}", f"{owner}/{repo}")
+    canonical_owner, canonical_repo = canonical.split("/", 1)
+    return canonical_repo if canonical_owner == DEFAULT_OWNER else canonical
+
+
 def resolve_repo(entry):
     if "/" in entry:
         owner, repo = entry.split("/", 1)
-        repo_name = entry if owner != DEFAULT_OWNER else repo
+        repo_name = canonical_repo_name(owner, repo)
     else:
         owner, repo, repo_name = DEFAULT_OWNER, entry, entry
     return owner, repo, repo_name

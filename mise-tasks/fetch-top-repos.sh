@@ -10,6 +10,22 @@ DEFAULT_OWNER="jdx"
 OUTPUT_FILE="top-repos.csv"
 REPOS_LIST_FILE="top-repos-list.txt"
 
+canonical_repo_name() {
+    local owner="$1"
+    local repo="$2"
+
+    case "$owner/$repo" in
+        endevco/aube) owner="jdx" ;;
+        endevco/pitchfork) owner="jdx" ;;
+    esac
+
+    if [ "$owner" = "$DEFAULT_OWNER" ]; then
+        echo "$repo"
+    else
+        echo "$owner/$repo"
+    fi
+}
+
 # Initialize CSV if it doesn't exist
 if [ ! -f "$OUTPUT_FILE" ]; then
     echo "date,repo_name,github_stars,brew_rank,brew_installs,brew_pct" > "$OUTPUT_FILE"
@@ -68,12 +84,8 @@ for entry in $TRACKED_REPOS; do
         repo="$entry"
     fi
 
-    # For repos outside the default owner, record as "owner/repo" in the CSV
-    if [ "$owner" = "$DEFAULT_OWNER" ]; then
-        repo_name="$repo"
-    else
-        repo_name="$owner/$repo"
-    fi
+    # Store moved repos under their canonical owner so chart series stay continuous.
+    repo_name=$(canonical_repo_name "$owner" "$repo")
 
     # Get GitHub stars
     STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
