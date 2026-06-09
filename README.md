@@ -6,7 +6,7 @@
 
 | Project | Competitor | Expected Crossover | Days Until | lead gain (stars/day) |
 | --- | --- | --- | --- | --- |
-| mise | just | 2027-05-20 | 345 | 15.5 |
+| mise | just | 2027-05-21 | 345 | 15.5 |
 | aube | berry | 2028-04-25 | 686 | 12.2 |
 | aube | npm | 2029-08-27 | 1175 | 10.1 |
 | aube | yarn | 2033-05-31 | 2547 | 16.3 |
