@@ -20,12 +20,16 @@ JUST_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
        https://api.github.com/repos/casey/just | \
        jq '.stargazers_count')
 
+BREW_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+       https://api.github.com/repos/Homebrew/brew | \
+       jq '.stargazers_count')
+
 # Create or append to competitors.csv
 if [ ! -f competitors.csv ]; then
-    echo "date,mise_stars,asdf_stars,hk_stars,just_stars" > competitors.csv
+    echo "date,mise_stars,asdf_stars,hk_stars,just_stars,brew_stars" > competitors.csv
 fi
 
-echo "$DATE,$MISE_STARS,$ASDF_STARS,$HK_STARS,$JUST_STARS" >> competitors.csv
+echo "$DATE,$MISE_STARS,$ASDF_STARS,$HK_STARS,$JUST_STARS,$BREW_STARS" >> competitors.csv
 uniq=uniq
 if command -v guniq &> /dev/null; then
     uniq=guniq

@@ -9,61 +9,83 @@ from tqdm import tqdm
 
 async def fetch_stargazer_history(repo, session, pbar):
     daily_stars = defaultdict(int)
-    
-    # Initialize with current total
+
     headers = {
         'Authorization': f'Bearer {os.environ["GITHUB_TOKEN"]}',
-        'Accept': 'application/vnd.github.v3.star+json'
+        'Accept': 'application/vnd.github+json'
     }
-    
-    async with session.get(
-        f'https://api.github.com/repos/{repo}',
-        headers=headers
-    ) as response:
-        repo_data = await response.json()
-        total_stars = repo_data['stargazers_count']
-        pbar.total = total_stars
-        pbar.set_description(f"Fetching {repo}")
-    
-    # Fetch all stargazers with timestamps
+
+    query = """
+    query($owner: String!, $repo: String!, $cursor: String) {
+      repository(owner: $owner, name: $repo) {
+        stargazers(
+          first: 100,
+          after: $cursor,
+          orderBy: {field: STARRED_AT, direction: ASC}
+        ) {
+          totalCount
+          edges {
+            starredAt
+          }
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+        }
+      }
+    }
+    """
+    owner, repo_name = repo.split("/", 1)
+    cursor = None
     page = 1
+
     while True:
-        async with session.get(
-            f'https://api.github.com/repos/{repo}/stargazers'
-            f'?page={page}&per_page=100',
-            headers=headers
+        async with session.post(
+            'https://api.github.com/graphql',
+            headers=headers,
+            json={
+                'query': query,
+                'variables': {
+                    'owner': owner,
+                    'repo': repo_name,
+                    'cursor': cursor,
+                },
+            },
         ) as response:
-            stars = await response.json()
-            
+            payload = await response.json()
+
+            if response.status != 200 or payload.get('errors'):
+                raise RuntimeError(f"GitHub GraphQL error for {repo}: {payload}")
+
+            stargazers = payload['data']['repository']['stargazers']
+            pbar.total = stargazers['totalCount']
+            pbar.set_description(f"Fetching {repo}")
+            stars = stargazers['edges']
+
             if not stars:
                 break
-                
+
             for star in stars:
                 starred_at = datetime.strptime(
-                    star['starred_at'], 
+                    star['starredAt'],
                     '%Y-%m-%dT%H:%M:%SZ'
                 ).replace(tzinfo=timezone.utc)
-                    
+
                 date = starred_at.strftime('%Y-%m-%d')
                 daily_stars[date] += 1
                 pbar.update(1)
-            
+
+            page_info = stargazers['pageInfo']
+            if not page_info['hasNextPage']:
+                break
+
+            cursor = page_info['endCursor']
             page += 1
-            
-            # Check rate limit
-            remaining = response.headers.get('X-RateLimit-Remaining')
-            if remaining and int(remaining) == 0:
-                reset_time = int(response.headers['X-RateLimit-Reset'])
-                wait_time = reset_time - datetime.now().timestamp()
-                if wait_time > 0:
-                    pbar.set_description(f"Rate limited, waiting {int(wait_time)}s...")
-                    await asyncio.sleep(wait_time + 1)
-                    pbar.set_description(f"Fetching {repo}")
-    
+
     return daily_stars
 
 async def fetch_all_repos():
-    repos = ['jdx/mise', 'asdf-vm/asdf', 'jdx/hk']
+    repos = ['jdx/mise', 'asdf-vm/asdf', 'jdx/hk', 'casey/just', 'Homebrew/brew']
     async with aiohttp.ClientSession() as session:
         pbars = [tqdm(position=i) for i in range(len(repos))]
         tasks = [fetch_stargazer_history(repo, session, pbar) 
@@ -120,23 +142,29 @@ def main():
     all_dates = sorted(
         set(star_histories['jdx/mise'].keys()) | 
         set(star_histories['asdf-vm/asdf'].keys()) |
-        set(star_histories['jdx/hk'].keys()))
-    mise_cumulative = asdf_cumulative = hk_cumulative = 0
+        set(star_histories['jdx/hk'].keys()) |
+        set(star_histories['casey/just'].keys()) |
+        set(star_histories['Homebrew/brew'].keys()))
+    mise_cumulative = asdf_cumulative = hk_cumulative = just_cumulative = brew_cumulative = 0
     competitor_data = []
     
     for date in all_dates:
         mise_cumulative += star_histories['jdx/mise'].get(date, 0)
         asdf_cumulative += star_histories['asdf-vm/asdf'].get(date, 0)
         hk_cumulative += star_histories['jdx/hk'].get(date, 0)
+        just_cumulative += star_histories['casey/just'].get(date, 0)
+        brew_cumulative += star_histories['Homebrew/brew'].get(date, 0)
         competitor_data.append({
             'date': date,
             'mise_stars': str(mise_cumulative),
             'asdf_stars': str(asdf_cumulative),
-            'hk_stars': str(hk_cumulative)
+            'hk_stars': str(hk_cumulative),
+            'just_stars': str(just_cumulative),
+            'brew_stars': str(brew_cumulative)
         })
 
     # Write competitors.csv
-    fieldnames = ['date', 'mise_stars', 'asdf_stars', 'hk_stars']
+    fieldnames = ['date', 'mise_stars', 'asdf_stars', 'hk_stars', 'just_stars', 'brew_stars']
     with open('competitors.csv', 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
