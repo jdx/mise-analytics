@@ -28,6 +28,7 @@ jobs:
           mise run fetch-competitors
           mise run fetch-hk-competitors
           mise run fetch-aube-competitors
+          mise run fetch-fnox-competitors
           mise run fetch-top-repos
           mise run fetch-top-repos-downloads
 
@@ -35,6 +36,7 @@ jobs:
         run: |
           mise run plot-stats
           mise run plot-hk-stats
+          mise run plot-fnox-stats
           mise run plot-aube-stats
           mise run plot-top-repos
           mise run plot-top-repos-downloads
