@@ -5,10 +5,13 @@ import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter
 from datetime import datetime
 import numpy as np
+from pathlib import Path
 from scipy import stats
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
 # Read the CSV file
-df_comp = pd.read_csv('fnox-competitors.csv')
+df_comp = pd.read_csv(REPO_ROOT / 'fnox-competitors.csv')
 
 # Convert date column to datetime
 df_comp['date'] = pd.to_datetime(df_comp['date'])
@@ -76,8 +79,12 @@ for name, info in active_competitors.items():
 def predict_crossing(df_comp, tool, days=30):
     cutoff_date = df_comp['date'].max() - pd.Timedelta(days=days)
     recent_data = df_comp[df_comp['date'] >= cutoff_date].copy()
+    if len(recent_data) < 2:
+        return None
 
     x = (recent_data['date'] - recent_data['date'].min()).dt.days
+    if x.nunique() < 2:
+        return None
 
     fnox_slope, _, _, _, _ = stats.linregress(x, recent_data['fnox_stars'])
     tool_slope, _, _, _, _ = stats.linregress(x, recent_data[f'{tool}_stars'])
@@ -165,4 +172,4 @@ ax.legend(lines, labels, loc='upper left')
 plt.tight_layout()
 
 # Save the plot
-plt.savefig('charts/fnox_stats.png', dpi=300, bbox_inches='tight')
+plt.savefig(REPO_ROOT / 'charts' / 'fnox_stats.png', dpi=300, bbox_inches='tight')
