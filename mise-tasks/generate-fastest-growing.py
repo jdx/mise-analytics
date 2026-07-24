@@ -118,13 +118,17 @@ def predict_crossing(df_comp: pd.DataFrame, focal: str, tool: str, days: int = 9
     if df_comp.empty or focal_col not in df_comp.columns or tool_col not in df_comp.columns:
         return None
 
-    cutoff_date = df_comp["date"].max() - pd.Timedelta(days=days)
-    recent_data = df_comp[df_comp["date"] >= cutoff_date].copy()
+    observed = df_comp[["date", focal_col, tool_col]].copy()
+    observed[focal_col] = pd.to_numeric(observed[focal_col], errors="coerce")
+    observed[tool_col] = pd.to_numeric(observed[tool_col], errors="coerce")
+    observed = observed.dropna(subset=["date", focal_col, tool_col])
+    observed = observed.sort_values("date")
 
-    if recent_data.empty:
+    if observed.empty:
         return None
-    if len(recent_data.loc[recent_data[tool_col] > 0, tool_col].dropna()) < 2:
-        return None
+
+    cutoff_date = observed["date"].max() - pd.Timedelta(days=days)
+    recent_data = observed[observed["date"] >= cutoff_date].copy()
 
     x = (recent_data["date"] - recent_data["date"].min()).dt.days
     focal_series = recent_data[focal_col].astype(float)
@@ -139,8 +143,8 @@ def predict_crossing(df_comp: pd.DataFrame, focal: str, tool: str, days: int = 9
     if focal_slope <= tool_slope:
         return None
 
-    focal_current = df_comp[focal_col].iloc[-1]
-    tool_current = df_comp[tool_col].iloc[-1]
+    focal_current = observed[focal_col].iloc[-1]
+    tool_current = observed[tool_col].iloc[-1]
 
     if focal_current >= tool_current:
         return datetime.now(UTC), focal_slope - tool_slope

@@ -27,7 +27,11 @@ def fetch_current_stars(owner, repo):
         'Accept': 'application/vnd.github.v3+json'
     }
     response = requests.get(url, headers=auth_headers)
-    return response.json().get('stargazers_count', 0)
+    response.raise_for_status()
+    data = response.json()
+    if 'stargazers_count' not in data:
+        raise RuntimeError(f"Missing stargazers_count for {owner}/{repo}")
+    return data['stargazers_count']
 
 
 def fetch_stargazers_history(owner, repo, start_date, end_date, max_pages=500):
@@ -49,8 +53,10 @@ def fetch_stargazers_history(owner, repo, start_date, end_date, max_pages=500):
         )
 
         if response.status_code != 200:
-            print(f"  Error {response.status_code}: {response.text[:200]}", flush=True)
-            break
+            raise RuntimeError(
+                f"Cannot backfill {owner}/{repo}: GitHub returned "
+                f"{response.status_code}: {response.text[:200]}"
+            )
 
         stars = response.json()
         if not stars or not isinstance(stars, list):

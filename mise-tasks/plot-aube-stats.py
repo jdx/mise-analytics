@@ -15,23 +15,37 @@ df_comp['date'] = pd.to_datetime(df_comp['date'])
 fig, ax = plt.subplots(figsize=(12, 6))
 
 
+def observed_rows(df, *columns):
+    """Return rows where every requested star count was actually observed."""
+    data = df[['date', *columns]].copy()
+    for column in columns:
+        data[column] = pd.to_numeric(data[column], errors='coerce')
+    data = data.dropna(subset=columns)
+    return data.sort_values('date')
+
+
 def calc_daily_avg(df, col_name, window_days=30):
-    """Average stars/day over the most recent `window_days` of nonzero data."""
-    data = df[df[col_name] > 0]
+    """Average stars/day over the most recent observed data."""
+    data = observed_rows(df, col_name)
+    data = data[data[col_name] > 0]
     if len(data) < 2:
-        return 0
+        return None
     cutoff = data['date'].max() - pd.Timedelta(days=window_days)
     recent = data[data['date'] >= cutoff]
     if len(recent) < 2:
         recent = data
     days = (recent['date'].iloc[-1] - recent['date'].iloc[0]).days
     if days == 0:
-        return 0
+        return None
     return (recent[col_name].iloc[-1] - recent[col_name].iloc[0]) / days
 
 
+def format_daily_avg(avg):
+    return 'collecting data' if avg is None else f'+{avg:.1f}/day'
+
+
 aube_avg = calc_daily_avg(df_comp, 'aube_stars')
-aube_current = df_comp['aube_stars'].iloc[-1]
+aube_current = observed_rows(df_comp, 'aube_stars')['aube_stars'].iloc[-1]
 
 # (display name, csv column prefix, color)
 competitors = {
@@ -50,7 +64,8 @@ active = {}
 for name, info in competitors.items():
     col = info.get('col', f"{name}_stars")
     info['col'] = col
-    data = df_comp[df_comp[col] > 0]
+    data = observed_rows(df_comp, col)
+    data = data[data[col] > 0]
     if len(data) == 0:
         continue
     info['data'] = data
@@ -64,7 +79,7 @@ aube_line = ax.plot(
     df_comp[df_comp['aube_stars'] > 0]['aube_stars'],
     color=aube_color,
     linewidth=3,
-    label=f'aube (+{aube_avg:.1f}/day)',
+    label=f'aube ({format_daily_avg(aube_avg)})',
 )
 
 # Plot competitors
@@ -74,24 +89,27 @@ for name, info in active.items():
         info['data'][info['col']],
         color=info['color'],
         marker=info.get('marker'),
-        label=f'{name} (+{info["avg"]:.1f}/day)',
+        label=f'{name} ({format_daily_avg(info["avg"])})',
     )
 
 
 def predict_crossing(df, col, days=30):
-    cutoff = df['date'].max() - pd.Timedelta(days=days)
-    recent = df[df['date'] >= cutoff].copy()
+    observed = observed_rows(df, 'aube_stars', col)
+    if observed.empty:
+        return None
+    cutoff = observed['date'].max() - pd.Timedelta(days=days)
+    recent = observed[observed['date'] >= cutoff].copy()
     if len(recent) < 2:
         return None
-    if len(recent.loc[recent[col] > 0, col].dropna()) < 2:
-        return None
     x = (recent['date'] - recent['date'].min()).dt.days
+    if len(x.unique()) < 2:
+        return None
     aube_slope, _, _, _, _ = stats.linregress(x, recent['aube_stars'])
     tool_slope, _, _, _, _ = stats.linregress(x, recent[col])
     if aube_slope <= tool_slope:
         return None
-    aube_now = df['aube_stars'].iloc[-1]
-    tool_now = df[col].iloc[-1]
+    aube_now = observed['aube_stars'].iloc[-1]
+    tool_now = observed[col].iloc[-1]
     if aube_now >= tool_now:
         return datetime.now(), aube_slope - tool_slope
     daily_gain = aube_slope - tool_slope
@@ -130,7 +148,7 @@ for name, info in active.items():
     # predictions still appear in the text box.
     if 0 < days_until <= 730:
         ax.axvline(x=avg_dt, color=info['color'], linestyle=':', alpha=0.5)
-        y_pos = df_comp[info['col']].iloc[-1]
+        y_pos = info['data'][info['col']].iloc[-1]
         ax.annotate(
             f'Passes {name}',
             xy=(avg_dt, y_pos),
@@ -163,7 +181,10 @@ plt.xticks(rotation=45)
 # Update labels with prediction suffixes and rebuild legend
 lines = aube_line
 for name, info in active.items():
-    label = f'{name} (+{info["avg"]:.1f}/day)' + prediction_labels.get(name, '')
+    label = (
+        f'{name} ({format_daily_avg(info["avg"])})'
+        + prediction_labels.get(name, '')
+    )
     info['line'][0].set_label(label)
     lines = lines + info['line']
 labels = [line.get_label() for line in lines]
