@@ -42,6 +42,7 @@ competitors = {
     'yarn berry': {'color': '#16A085', 'col': 'berry_stars'},
     'bun':        {'color': '#E84393'},
     'deno':       {'color': '#27AE60'},
+    'nub':        {'color': '#34495E', 'marker': 'o'},
 }
 
 # Resolve column names + capture per-competitor data
@@ -72,6 +73,7 @@ for name, info in active.items():
         info['data']['date'],
         info['data'][info['col']],
         color=info['color'],
+        marker=info.get('marker'),
         label=f'{name} (+{info["avg"]:.1f}/day)',
     )
 
@@ -80,6 +82,8 @@ def predict_crossing(df, col, days=30):
     cutoff = df['date'].max() - pd.Timedelta(days=days)
     recent = df[df['date'] >= cutoff].copy()
     if len(recent) < 2:
+        return None
+    if len(recent.loc[recent[col] > 0, col].dropna()) < 2:
         return None
     x = (recent['date'] - recent['date'].min()).dt.days
     aube_slope, _, _, _, _ = stats.linregress(x, recent['aube_stars'])

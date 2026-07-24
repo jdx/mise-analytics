@@ -6,7 +6,7 @@ OUTPUT_FILE="aube-competitors.csv"
 
 # Initialize CSV if it doesn't exist
 if [ ! -f "$OUTPUT_FILE" ]; then
-    echo "date,aube_stars,vlt_stars,npm_stars,pnpm_stars,yarn_stars,berry_stars,bun_stars,deno_stars" > "$OUTPUT_FILE"
+    echo "date,aube_stars,vlt_stars,npm_stars,pnpm_stars,yarn_stars,berry_stars,bun_stars,deno_stars,nub_stars" > "$OUTPUT_FILE"
 fi
 
 fetch_stars() {
@@ -22,8 +22,9 @@ YARN_STARS=$(fetch_stars yarnpkg/yarn)
 BERRY_STARS=$(fetch_stars yarnpkg/berry)
 BUN_STARS=$(fetch_stars oven-sh/bun)
 DENO_STARS=$(fetch_stars denoland/deno)
+NUB_STARS=$(fetch_stars nubjs/nub)
 
-echo "$DATE,$AUBE_STARS,$VLT_STARS,$NPM_STARS,$PNPM_STARS,$YARN_STARS,$BERRY_STARS,$BUN_STARS,$DENO_STARS" >> "$OUTPUT_FILE"
+echo "$DATE,$AUBE_STARS,$VLT_STARS,$NPM_STARS,$PNPM_STARS,$YARN_STARS,$BERRY_STARS,$BUN_STARS,$DENO_STARS,$NUB_STARS" >> "$OUTPUT_FILE"
 
 # Deduplicate entries (keep only latest entry per day)
 awk -F',' '!seen[$1]++' "$OUTPUT_FILE" > "/tmp/aube-competitors-temp.csv" && mv "/tmp/aube-competitors-temp.csv" "$OUTPUT_FILE"

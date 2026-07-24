@@ -100,6 +100,7 @@ competitors = [
     ('yarnpkg', 'berry', 'berry'),
     ('oven-sh', 'bun', 'bun'),
     ('denoland', 'deno', 'deno'),
+    ('nubjs', 'nub', 'nub'),
 ]
 
 print(f"Backfilling aube competitor data from {START_DATE} to {END_DATE}", flush=True)
@@ -160,6 +161,7 @@ for date in dates:
         'berry_stars': cumulative['berry'],
         'bun_stars': cumulative['bun'],
         'deno_stars': cumulative['deno'],
+        'nub_stars': cumulative['nub'],
     })
 
 df = pd.DataFrame(rows)

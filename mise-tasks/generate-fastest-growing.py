@@ -123,6 +123,8 @@ def predict_crossing(df_comp: pd.DataFrame, focal: str, tool: str, days: int = 9
 
     if recent_data.empty:
         return None
+    if len(recent_data.loc[recent_data[tool_col] > 0, tool_col].dropna()) < 2:
+        return None
 
     x = (recent_data["date"] - recent_data["date"].min()).dt.days
     focal_series = recent_data[focal_col].astype(float)
