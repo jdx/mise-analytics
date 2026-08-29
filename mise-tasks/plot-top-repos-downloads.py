@@ -59,6 +59,15 @@ def plot_panel(ax, repos, df, colors, title):
         repo_data = df[df["repo_name"] == repo]
         v = velocity_for_repo(repo_data)
         if v.empty:
+            ax.plot(
+                [],
+                [],
+                color=colors[idx % len(colors)],
+                label=f"{repo} (collecting)",
+                marker="o",
+                linewidth=2,
+            )
+            plotted_any = True
             continue
         latest = v["velocity"].iloc[-1]
         ax.plot(
@@ -105,7 +114,13 @@ def main():
     tracked = read_tracked_repo_names()
     df = df[df["repo_name"].isin(tracked)]
 
-    others = [r for r in tracked if r != "mise"]
+    latest_rows = df.loc[df.groupby("repo_name")["date"].idxmax()]
+    latest_downloads = latest_rows.set_index("repo_name")["release_downloads"]
+    others = [
+        repo
+        for repo in tracked
+        if repo != "mise" and latest_downloads.get(repo, 0) > 0
+    ]
     latest_velocities = {}
     for repo in others:
         velocity = velocity_for_repo(df[df["repo_name"] == repo])
