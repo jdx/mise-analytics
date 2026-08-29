@@ -13,6 +13,6 @@ jdx/mise-action
 jdx/demand
 jdx/communique
 jdx/pklr
-jdx/ruby
 jdx/mr-boxington
-jdx/tak
+jdx/ruby
+jdx/expr.rs
