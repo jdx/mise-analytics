@@ -2,7 +2,7 @@
 set -exuo pipefail
 
 DATE=$(date '+%Y-%m-%d')
-# Accounts scanned for the top 10. Top 10 is computed across the union.
+# Accounts scanned for the tracked repos. The ranking is computed across the union.
 GITHUB_USERS=("jdx" "endevco")
 # Default owner used when an entry has no "owner/" prefix; kept for back-compat
 # with older CSV rows that used the bare repo name.
@@ -42,8 +42,9 @@ done
 # Filter: exclude archived repos, forks, sample projects, and those not updated in >1 year
 # Calculate cutoff date as 1 year ago from today
 CUTOFF_DATE=$(date -u -v-1y '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || date -u -d '1 year ago' '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || echo "2024-10-26T00:00:00Z")
-# Track top 11 so the chart (which excludes mise) still shows 10 repos
-CURRENT_TOP_10=$(echo "$ALL_REPOS" | jq -r --arg cutoff "$CUTOFF_DATE" '
+# Track the top 13. The stars chart excludes mise and displays its top 10;
+# download collection covers every repository in this larger set.
+TRACKED_REPOS=$(echo "$ALL_REPOS" | jq -r --arg cutoff "$CUTOFF_DATE" '
     sort_by(-.stargazers_count) |
     .[] |
     select(
@@ -53,19 +54,17 @@ CURRENT_TOP_10=$(echo "$ALL_REPOS" | jq -r --arg cutoff "$CUTOFF_DATE" '
         (.name | test("sample|demo|example"; "i") | not)
     ) |
     .full_name
-' | head -11)
+' | head -13)
 
-# Replace the entire repos list with current top 11 across tracked accounts
+# Replace the entire repos list with the current top 13 across tracked accounts
 echo "# Top repos list - automatically managed" > "$REPOS_LIST_FILE"
-echo "# Top 11 active repos across tracked accounts (${GITHUB_USERS[*]}), refreshed regularly" >> "$REPOS_LIST_FILE"
-echo "# The chart excludes mise and shows the remaining 10" >> "$REPOS_LIST_FILE"
+echo "# Top 13 active repos across tracked accounts (${GITHUB_USERS[*]}), refreshed regularly" >> "$REPOS_LIST_FILE"
+echo "# The stars chart excludes mise and shows the top 10; downloads track all 13" >> "$REPOS_LIST_FILE"
 echo "# Filters: excludes archived repos, forks, sample/demo projects, and repos not updated in >1 year" >> "$REPOS_LIST_FILE"
 echo "# Entries use \"owner/repo\" format (bare \"repo\" is also accepted and assumed owned by $DEFAULT_OWNER)" >> "$REPOS_LIST_FILE"
-for repo in $CURRENT_TOP_10; do
+for repo in $TRACKED_REPOS; do
     echo "$repo" >> "$REPOS_LIST_FILE"
 done
-
-TRACKED_REPOS="$CURRENT_TOP_10"
 
 # Fetch Homebrew analytics data once
 BREW_DATA=$(curl -s https://formulae.brew.sh/api/analytics/install-on-request/30d.json)
