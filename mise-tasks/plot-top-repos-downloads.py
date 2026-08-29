@@ -106,24 +106,28 @@ def main():
     df = df[df["repo_name"].isin(tracked)]
 
     others = [r for r in tracked if r != "mise"]
-    others_latest = (
-        df[df["repo_name"].isin(others)]
-        .loc[lambda d: d.groupby("repo_name")["date"].idxmax()]
-        .sort_values("release_downloads", ascending=False)["repo_name"]
-        .tolist()
+    latest_velocities = {}
+    for repo in others:
+        velocity = velocity_for_repo(df[df["repo_name"] == repo])
+        if not velocity.empty:
+            latest_velocities[repo] = velocity["velocity"].iloc[-1]
+    others_by_velocity = sorted(
+        others,
+        key=lambda repo: latest_velocities.get(repo, float("-inf")),
+        reverse=True,
     )
 
     fig, (ax_mise, ax_others) = plt.subplots(2, 1, figsize=(14, 10))
 
     mise_colors = ["#1f77b4"]
     other_colors = plt.cm.tab20(
-        np.linspace(0, 1, max(len(others_latest), 1))
+        np.linspace(0, 1, max(len(others_by_velocity), 1))
     )
 
     plot_panel(ax_mise, ["mise"], df, mise_colors, "mise — Release Downloads / Day")
     plot_panel(
         ax_others,
-        others_latest,
+        others_by_velocity,
         df,
         other_colors,
         "Other Top Repos — Release Downloads / Day",
