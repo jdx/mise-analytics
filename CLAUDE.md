@@ -21,7 +21,7 @@ All tasks are defined as executable scripts in `mise-tasks/` and run via mise:
 mise run fetch-stats          # Fetch Homebrew analytics + GitHub stars
 mise run fetch-competitors    # Fetch mise vs asdf/just/brew comparison data
 mise run fetch-hk-competitors # Fetch hk competitor data
-mise run fetch-top-repos      # Fetch top 10 jdx repos
+mise run fetch-top-repos      # Fetch top 13 active repos
 mise run plot-stats           # Generate mise vs competitors chart
 mise run plot-hk-stats        # Generate hk chart
 mise run plot-fnox-stats      # Generate fnox chart

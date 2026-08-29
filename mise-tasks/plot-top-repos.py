@@ -46,8 +46,8 @@ from datetime import datetime, timedelta
 two_years_ago = datetime.now() - timedelta(days=730)
 df = df[df['date'] >= two_years_ago]
 
-# Restrict to the currently tracked top 10 (excludes historical rows for
-# repos that dropped off the list)
+# Restrict to currently tracked repos (excludes historical rows for repos that
+# dropped off the list). The chart below still displays the top 10 excluding mise.
 tracked = read_tracked_repo_names()
 df = df[df['repo_name'].isin(tracked)]
 
