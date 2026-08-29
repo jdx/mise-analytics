@@ -116,7 +116,9 @@ def main():
     fig, (ax_mise, ax_others) = plt.subplots(2, 1, figsize=(14, 10))
 
     mise_colors = ["#1f77b4"]
-    other_colors = plt.cm.tab10(np.linspace(0, 1, 10))
+    other_colors = plt.cm.tab20(
+        np.linspace(0, 1, max(len(others_latest), 1))
+    )
 
     plot_panel(ax_mise, ["mise"], df, mise_colors, "mise — Release Downloads / Day")
     plot_panel(
