@@ -5,7 +5,6 @@
 # Entries use "owner/repo" format (bare "repo" is also accepted and assumed owned by jdx)
 jdx/mise
 jdx/fnox
-jdx/aube
 jdx/hk
 jdx/usage
 jdx/pitchfork
@@ -16,3 +15,4 @@ jdx/mr-boxington
 jdx/pklr
 jdx/ruby
 jdx/expr.rs
+jdx/tak
