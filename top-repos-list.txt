@@ -10,8 +10,8 @@ jdx/usage
 jdx/pitchfork
 jdx/mise-action
 jdx/demand
-jdx/communique
 jdx/mr-boxington
+jdx/communique
 jdx/pklr
 jdx/ruby
 jdx/expr.rs
