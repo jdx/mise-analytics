@@ -10,6 +10,7 @@ from tqdm import tqdm
 DEFAULT_OWNER = 'jdx'
 CANONICAL_REPOS = {
     'endevco/aube': 'jdx/aube',
+    'aubepkg/aube': 'jdx/aube',
     'endevco/pitchfork': 'jdx/pitchfork',
 }
 

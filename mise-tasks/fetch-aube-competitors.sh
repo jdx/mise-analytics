@@ -10,11 +10,11 @@ if [ ! -f "$OUTPUT_FILE" ]; then
 fi
 
 fetch_stars() {
-    curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
-        "https://api.github.com/repos/$1" | jq '.stargazers_count'
+    curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" \
+        "https://api.github.com/repos/$1" | jq -er '.stargazers_count'
 }
 
-AUBE_STARS=$(fetch_stars jdx/aube)
+AUBE_STARS=$(fetch_stars aubepkg/aube)
 VLT_STARS=$(fetch_stars vltpkg/vltpkg)
 NPM_STARS=$(fetch_stars npm/cli)
 PNPM_STARS=$(fetch_stars pnpm/pnpm)
@@ -26,5 +26,7 @@ NUB_STARS=$(fetch_stars nubjs/nub)
 
 echo "$DATE,$AUBE_STARS,$VLT_STARS,$NPM_STARS,$PNPM_STARS,$YARN_STARS,$BERRY_STARS,$BUN_STARS,$DENO_STARS,$NUB_STARS" >> "$OUTPUT_FILE"
 
-# Deduplicate entries (keep only latest entry per day)
-awk -F',' '!seen[$1]++' "$OUTPUT_FILE" > "/tmp/aube-competitors-temp.csv" && mv "/tmp/aube-competitors-temp.csv" "$OUTPUT_FILE"
+# Deduplicate entries (keep only latest entry per day). This also lets a rerun
+# replace a failed fetch from earlier in the day.
+awk -F',' '{ rows[$1] = $0; if (!seen[$1]++) order[++count] = $1 } END { for (i = 1; i <= count; i++) print rows[order[i]] }' \
+    "$OUTPUT_FILE" > "/tmp/aube-competitors-temp.csv" && mv "/tmp/aube-competitors-temp.csv" "$OUTPUT_FILE"

@@ -98,7 +98,7 @@ START_DATE = '2025-01-01'
 END_DATE = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
 
 competitors = [
-    ('jdx', 'aube', 'aube'),
+    ('aubepkg', 'aube', 'aube'),
     ('vltpkg', 'vltpkg', 'vlt'),
     ('npm', 'cli', 'npm'),
     ('pnpm', 'pnpm', 'pnpm'),

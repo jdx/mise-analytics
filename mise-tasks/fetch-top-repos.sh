@@ -3,7 +3,7 @@ set -exuo pipefail
 
 DATE=$(date '+%Y-%m-%d')
 # Accounts scanned for the tracked repos. The ranking is computed across the union.
-GITHUB_USERS=("jdx" "endevco")
+GITHUB_USERS=("jdx" "endevco" "aubepkg")
 # Default owner used when an entry has no "owner/" prefix; kept for back-compat
 # with older CSV rows that used the bare repo name.
 DEFAULT_OWNER="jdx"
@@ -16,6 +16,7 @@ canonical_repo_name() {
 
     case "$owner/$repo" in
         endevco/aube) owner="jdx" ;;
+        aubepkg/aube) owner="jdx" ;;
         endevco/pitchfork) owner="jdx" ;;
     esac
 
@@ -34,7 +35,7 @@ fi
 # Fetch repos for each tracked account, then merge into a single JSON array
 ALL_REPOS="[]"
 for user in "${GITHUB_USERS[@]}"; do
-    user_repos=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+    user_repos=$(curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" \
         "https://api.github.com/users/$user/repos?per_page=100&sort=updated")
     ALL_REPOS=$(jq -s '.[0] + .[1]' <(echo "$ALL_REPOS") <(echo "$user_repos"))
 done
@@ -87,9 +88,9 @@ for entry in $TRACKED_REPOS; do
     repo_name=$(canonical_repo_name "$owner" "$repo")
 
     # Get GitHub stars
-    STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+    STARS=$(curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" \
            "https://api.github.com/repos/$owner/$repo" | \
-           jq '.stargazers_count')
+           jq -er '.stargazers_count')
 
     # Check if repo exists in Homebrew
     BREW_STATS=$(echo "$BREW_DATA" | jq -r ".items[] | select(.formula == \"$repo\")")

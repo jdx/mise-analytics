@@ -13,6 +13,7 @@ import requests
 DEFAULT_OWNER = "jdx"
 CANONICAL_REPOS = {
     "endevco/aube": "jdx/aube",
+    "aubepkg/aube": "jdx/aube",
     "endevco/pitchfork": "jdx/pitchfork",
 }
 REPO_ROOT = Path(__file__).resolve().parent.parent
