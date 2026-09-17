@@ -15,4 +15,4 @@ jdx/mr-boxington
 jdx/communique
 jdx/pklr
 jdx/ruby
-jdx/expr.rs
+jdx/packslip
