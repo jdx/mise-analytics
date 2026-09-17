@@ -14,5 +14,5 @@ jdx/demand
 jdx/mr-boxington
 jdx/communique
 jdx/pklr
-jdx/ruby
 jdx/packslip
+jdx/ruby
