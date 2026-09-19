@@ -10,8 +10,8 @@ jdx/hk
 jdx/usage
 jdx/pitchfork
 jdx/mise-action
-jdx/demand
 jdx/mr-boxington
+jdx/demand
 jdx/communique
 jdx/pklr
 jdx/packslip
