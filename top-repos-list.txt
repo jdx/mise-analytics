@@ -9,8 +9,8 @@ aubepkg/aube
 jdx/hk
 jdx/usage
 jdx/pitchfork
-jdx/mise-action
 jdx/mr-boxington
+jdx/mise-action
 jdx/demand
 jdx/communique
 jdx/pklr
