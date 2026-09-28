@@ -9,7 +9,7 @@
 | mise | just | 2026-11-29 | 61 | 27.7 |
 | mise | brew | 2028-03-12 | 530 | 30.6 |
 | aube | npm | 2029-07-05 | 1010 | 8.0 |
-| aube | berry | 2030-07-23 | 1393 | 6.0 |
+| aube | berry | 2030-07-25 | 1395 | 6.0 |
 | aube | yarn | 2036-05-02 | 3503 | 11.3 |
 
 <!-- END upcoming-crossovers -->
