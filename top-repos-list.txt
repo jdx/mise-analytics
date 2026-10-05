@@ -12,7 +12,7 @@ jdx/pitchfork
 jdx/mr-boxington
 jdx/mise-action
 jdx/demand
-jdx/communique
 jdx/packslip
+jdx/communique
 jdx/pklr
 jdx/ruby
