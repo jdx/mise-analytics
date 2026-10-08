@@ -43,8 +43,9 @@ done
 # Filter: exclude archived repos, forks, sample projects, and those not updated in >1 year
 # Calculate cutoff date as 1 year ago from today
 CUTOFF_DATE=$(date -u -v-1y '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || date -u -d '1 year ago' '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || echo "2024-10-26T00:00:00Z")
-# Track the top 13. The stars chart excludes mise and displays its top 10;
-# download collection covers every repository in this larger set.
+# Track the top 13 (plus the jdx.dev projects added below). The stars chart
+# excludes mise and displays its top 10; download collection covers every
+# repository in this larger set.
 TRACKED_REPOS=$(echo "$ALL_REPOS" | jq -r --arg cutoff "$CUTOFF_DATE" '
     sort_by(-.stargazers_count) |
     .[] |
@@ -57,10 +58,17 @@ TRACKED_REPOS=$(echo "$ALL_REPOS" | jq -r --arg cutoff "$CUTOFF_DATE" '
     .full_name
 ' | head -13)
 
-# Replace the entire repos list with the current top 13 across tracked accounts
+# Also track every project featured on jdx.dev, so adding a project to the
+# blog's data/oss.toml is enough for it to show up in mise-versions stats.
+FEATURED_REPOS=$(curl -fsSL https://jdx.dev/oss.json | jq -er '.projects[].repo')
+# Keep the top-13 order and append featured repos it doesn't already contain
+# (compared case-insensitively, since GitHub full names are).
+TRACKED_REPOS=$(printf '%s\n' "$TRACKED_REPOS" "$FEATURED_REPOS" | awk 'NF && !seen[tolower($0)]++')
+
+# Replace the entire repos list with the top 13 plus the jdx.dev projects
 echo "# Top repos list - automatically managed" > "$REPOS_LIST_FILE"
-echo "# Top 13 active repos across tracked accounts (${GITHUB_USERS[*]}), refreshed regularly" >> "$REPOS_LIST_FILE"
-echo "# The stars chart excludes mise and shows the top 10; downloads track all 13" >> "$REPOS_LIST_FILE"
+echo "# Top 13 active repos across tracked accounts (${GITHUB_USERS[*]}) plus the projects featured on jdx.dev, refreshed regularly" >> "$REPOS_LIST_FILE"
+echo "# The stars chart excludes mise and shows the top 10; downloads track every repo listed here" >> "$REPOS_LIST_FILE"
 echo "# Filters: excludes archived repos, forks, sample/demo projects, and repos not updated in >1 year" >> "$REPOS_LIST_FILE"
 echo "# Entries use \"owner/repo\" format (bare \"repo\" is also accepted and assumed owned by $DEFAULT_OWNER)" >> "$REPOS_LIST_FILE"
 for repo in $TRACKED_REPOS; do
