@@ -1,6 +1,6 @@
 # Top repos list - automatically managed
-# Top 13 active repos across tracked accounts (jdx endevco aubepkg), refreshed regularly
-# The stars chart excludes mise and shows the top 10; downloads track all 13
+# Top 13 active repos across tracked accounts (jdx endevco aubepkg) plus the projects featured on jdx.dev, refreshed regularly
+# The stars chart excludes mise and shows the top 10; downloads track every repo listed here
 # Filters: excludes archived repos, forks, sample/demo projects, and repos not updated in >1 year
 # Entries use "owner/repo" format (bare "repo" is also accepted and assumed owned by jdx)
 jdx/mise
@@ -16,3 +16,5 @@ jdx/packslip
 jdx/communique
 jdx/pklr
 jdx/tak
+jdx/ruby
+jdx/jactionlint
