@@ -45,9 +45,16 @@ def read_tracked_repo_names():
 
 
 def velocity_for_repo(repo_data: pd.DataFrame) -> pd.DataFrame:
-    """Daily delta with rolling mean. Drops the first row (no prior to diff against)."""
-    s = repo_data.sort_values("date").set_index("date")["release_downloads"]
-    daily = s.diff().dropna()
+    """Downloads per day, with a rolling mean. Drops the first row (no prior to diff against).
+
+    Snapshots are not exactly 24h apart (pushes and manual runs also fetch), so
+    each delta is scaled by the time elapsed between the two snapshots.
+    """
+    d = repo_data.sort_values("fetched_at")
+    totals = d.set_index("date")["release_downloads"]
+    hours = d["fetched_at"].diff().dt.total_seconds().div(3600).values
+    daily = totals.diff() * 24 / pd.Series(hours, index=totals.index)
+    daily = daily.iloc[1:]
     if daily.empty:
         return pd.DataFrame()
     # The total is the sum over releases that still exist, so deleting or
@@ -112,6 +119,9 @@ def plot_panel(ax, repos, df, colors, title):
 def main():
     df = pd.read_csv(CSV_PATH)
     df["date"] = pd.to_datetime(df["date"])
+    # Rows from before fetched_at was recorded were taken by the 08:15 UTC cron.
+    fetched = pd.to_datetime(df["fetched_at"], utc=True, errors="coerce").dt.tz_localize(None)
+    df["fetched_at"] = fetched.fillna(df["date"] + pd.Timedelta(hours=8, minutes=15))
     df["release_downloads"] = pd.to_numeric(df["release_downloads"], errors="coerce")
     df = df.dropna(subset=["release_downloads"])
 

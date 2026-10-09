@@ -19,6 +19,7 @@ CANONICAL_REPOS = {
 REPO_ROOT = Path(__file__).resolve().parent.parent
 REPOS_LIST_FILE = REPO_ROOT / "top-repos-list.txt"
 OUTPUT_FILE = REPO_ROOT / "top-repos-downloads.csv"
+HEADER = ["date", "repo_name", "release_downloads", "fetched_at"]
 
 
 def canonical_repo_name(owner, repo):
@@ -78,7 +79,9 @@ def main():
         }
     )
 
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    now = datetime.now(timezone.utc)
+    today = now.strftime("%Y-%m-%d")
+    fetched_at = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     new_file = not OUTPUT_FILE.exists()
 
     previous_totals = {}
@@ -103,24 +106,26 @@ def main():
                 "(release deleted or assets pruned); the chart skips this day",
                 file=sys.stderr,
             )
-        rows.append((today, repo_name, total))
+        rows.append((today, repo_name, total, fetched_at))
 
     with OUTPUT_FILE.open("a", newline="") as f:
         writer = csv.writer(f)
         if new_file:
-            writer.writerow(["date", "repo_name", "release_downloads"])
+            writer.writerow(HEADER)
         writer.writerows(rows)
 
-    # Dedupe: keep last entry per (date, repo_name)
+    # Dedupe: keep last entry per (date, repo_name). Rows written before
+    # fetched_at existed are padded with an empty value.
     seen = {}
     with OUTPUT_FILE.open() as f:
         reader = csv.reader(f)
-        header = next(reader)
+        next(reader)
         for row in reader:
+            row = (row + [""])[: len(HEADER)]
             seen[(row[0], row[1])] = row
     with OUTPUT_FILE.open("w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(header)
+        writer.writerow(HEADER)
         for row in seen.values():
             writer.writerow(row)
 
