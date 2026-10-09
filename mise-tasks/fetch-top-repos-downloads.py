@@ -81,6 +81,13 @@ def main():
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     new_file = not OUTPUT_FILE.exists()
 
+    previous_totals = {}
+    if not new_file:
+        with OUTPUT_FILE.open() as f:
+            for row in csv.DictReader(f):
+                if row["date"] < today:
+                    previous_totals[row["repo_name"]] = int(row["release_downloads"])
+
     rows = []
     for owner, name, repo_name in read_tracked_repos():
         try:
@@ -89,6 +96,13 @@ def main():
             print(f"error fetching {owner}/{name}: {e}", file=sys.stderr)
             continue
         print(f"{repo_name}: {total:,} downloads")
+        previous = previous_totals.get(repo_name)
+        if previous is not None and total < previous:
+            print(
+                f"warning: {repo_name} total fell by {previous - total:,} "
+                "(release deleted or assets pruned); the chart skips this day",
+                file=sys.stderr,
+            )
         rows.append((today, repo_name, total))
 
     with OUTPUT_FILE.open("a", newline="") as f:

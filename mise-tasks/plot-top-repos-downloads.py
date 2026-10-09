@@ -50,7 +50,13 @@ def velocity_for_repo(repo_data: pd.DataFrame) -> pd.DataFrame:
     daily = s.diff().dropna()
     if daily.empty:
         return pd.DataFrame()
-    rolled = daily.rolling(window=ROLLING_WINDOW, min_periods=1).mean()
+    # The total is the sum over releases that still exist, so deleting or
+    # pruning a release makes it fall. That is not negative downloads; treat
+    # the day as unknown and let the rolling mean skip it.
+    daily = daily.where(daily >= 0)
+    rolled = daily.rolling(window=ROLLING_WINDOW, min_periods=1).mean().dropna()
+    if rolled.empty:
+        return pd.DataFrame()
     return pd.DataFrame({"date": rolled.index, "velocity": rolled.values})
 
 
