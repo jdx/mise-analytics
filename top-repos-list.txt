@@ -11,8 +11,8 @@ jdx/usage
 jdx/pitchfork
 jdx/mr-boxington
 jdx/mise-action
-jdx/demand
 jdx/jactionlint
+jdx/demand
 jdx/packslip
 jdx/communique
 jdx/pklr
