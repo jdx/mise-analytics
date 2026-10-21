@@ -22,7 +22,7 @@ CSV_PATH = REPO_ROOT / "top-repos-downloads.csv"
 LIST_PATH = REPO_ROOT / "top-repos-list.txt"
 OUT_PATH = REPO_ROOT / "charts" / "top_repos_downloads.png"
 ROLLING_WINDOW = 7
-MISE_PANEL_REPOS = ["mise", "hk"]
+MISE_PANEL_REPOS = ["mise"]
 
 
 def canonical_repo_name(owner, repo):
@@ -154,14 +154,12 @@ def main():
 
     fig, (ax_mise, ax_others) = plt.subplots(2, 1, figsize=(14, 10))
 
-    mise_colors = ["#1f77b4", "#E67E22"]
+    mise_colors = ["#1f77b4"]
     other_colors = plt.cm.tab20(
         np.linspace(0, 1, max(len(others_by_velocity), 1))
     )
 
-    plot_panel(
-        ax_mise, MISE_PANEL_REPOS, df, mise_colors, "mise and hk — Release Downloads / Day"
-    )
+    plot_panel(ax_mise, MISE_PANEL_REPOS, df, mise_colors, "mise — Release Downloads / Day")
     plot_panel(
         ax_others,
         others_by_velocity,
