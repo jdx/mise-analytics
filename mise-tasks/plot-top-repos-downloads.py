@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.dates import DateFormatter
+from matplotlib.ticker import FuncFormatter
 
 DEFAULT_OWNER = "jdx"
 CANONICAL_REPOS = {
@@ -21,6 +22,7 @@ CSV_PATH = REPO_ROOT / "top-repos-downloads.csv"
 LIST_PATH = REPO_ROOT / "top-repos-list.txt"
 OUT_PATH = REPO_ROOT / "charts" / "top_repos_downloads.png"
 ROLLING_WINDOW = 7
+MISE_PANEL_REPOS = ["mise", "hk"]
 
 
 def canonical_repo_name(owner, repo):
@@ -96,6 +98,7 @@ def plot_panel(ax, repos, df, colors, title):
         plotted_any = True
 
     ax.set_ylabel("Downloads / day", fontsize=11)
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f"{y:,.0f}"))
     ax.set_title(title, fontsize=13, fontweight="bold")
     ax.grid(True, alpha=0.3)
     if plotted_any:
@@ -136,7 +139,7 @@ def main():
     others = [
         repo
         for repo in tracked
-        if repo != "mise" and latest_downloads.get(repo, 0) > 0
+        if repo not in MISE_PANEL_REPOS and latest_downloads.get(repo, 0) > 0
     ]
     latest_velocities = {}
     for repo in others:
@@ -151,12 +154,14 @@ def main():
 
     fig, (ax_mise, ax_others) = plt.subplots(2, 1, figsize=(14, 10))
 
-    mise_colors = ["#1f77b4"]
+    mise_colors = ["#1f77b4", "#E67E22"]
     other_colors = plt.cm.tab20(
         np.linspace(0, 1, max(len(others_by_velocity), 1))
     )
 
-    plot_panel(ax_mise, ["mise"], df, mise_colors, "mise — Release Downloads / Day")
+    plot_panel(
+        ax_mise, MISE_PANEL_REPOS, df, mise_colors, "mise and hk — Release Downloads / Day"
+    )
     plot_panel(
         ax_others,
         others_by_velocity,
