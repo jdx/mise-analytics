@@ -6,10 +6,10 @@
 
 | Project | Competitor | Expected Crossover | Days Until | lead gain (stars/day) |
 | --- | --- | --- | --- | --- |
-| mise | just | 2026-12-04 | 38 | 26.6 |
-| mise | brew | 2028-03-07 | 498 | 29.8 |
-| aube | berry | 2030-12-21 | 1517 | 4.7 |
-| aube | npm | 2032-10-05 | 2170 | 3.8 |
+| mise | just | 2026-12-04 | 37 | 26.5 |
+| mise | brew | 2028-03-07 | 496 | 29.7 |
+| aube | berry | 2031-01-22 | 1548 | 4.6 |
+| aube | npm | 2032-12-11 | 2236 | 3.7 |
 
 <!-- END upcoming-crossovers -->
 
@@ -49,12 +49,11 @@
 
 <!-- START fastest-growing -->
 
-Data window: 2026-09-27 → 2026-10-26 (UTC)
+Data window: 2026-09-28 → 2026-10-27 (UTC)
 
 | Date | mise | jactionlint | mr-boxington | fnox | packslip |
 | --- | --- | --- | --- | --- | --- |
-| 2026-09-27 | 34,329 | — | 386 | 2,191 | 61 |
-| 2026-09-28 | 34,361 (+32) | — | 413 (+27) | 2,194 (+3) | 63 (+2) |
+| 2026-09-28 | 34,361 | — | 413 | 2,194 | 63 |
 | 2026-09-29 | 34,413 (+52) | — | 424 (+11) | 2,202 (+8) | 74 (+11) |
 | 2026-09-30 | 34,452 (+39) | — | 431 (+7) | 2,207 (+5) | 83 (+9) |
 | 2026-10-01 | 34,478 (+26) | — | 435 (+4) | 2,210 (+3) | 84 (+1) |
@@ -83,11 +82,12 @@ Data window: 2026-09-27 → 2026-10-26 (UTC)
 | 2026-10-24 | 35,319 (+29) | 281 (+5) | 587 (+12) | 2,303 (+4) | 160 (+1) |
 | 2026-10-25 | 35,349 (+30) | 283 (+2) | 596 (+9) | 2,307 (+4) | 160 (+0) |
 | 2026-10-26 | 35,382 (+33) | 287 (+4) | 598 (+2) | 2,314 (+7) | 161 (+1) |
+| 2026-10-27 | 35,440 (+58) | 294 (+7) | 610 (+12) | 2,319 (+5) | 163 (+2) |
 
-- `mise` grew by +1,053 stars
-- `jactionlint` grew by +260 stars
-- `mr-boxington` grew by +212 stars
-- `fnox` grew by +123 stars
+- `mise` grew by +1,079 stars
+- `jactionlint` grew by +267 stars
+- `mr-boxington` grew by +197 stars
+- `fnox` grew by +125 stars
 - `packslip` grew by +100 stars
 
 <!-- END fastest-growing -->
