@@ -18,3 +18,4 @@ jdx/communique
 jdx/pklr
 jdx/ruby
 jdx/tak
+jdx/jouet
