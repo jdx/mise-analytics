@@ -8,8 +8,8 @@ jdx/fnox
 aubepkg/aube
 jdx/hk
 jdx/usage
-jdx/pitchfork
 jdx/mr-boxington
+jdx/pitchfork
 jdx/mise-action
 jdx/jactionlint
 jdx/demand
