@@ -20,6 +20,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          # A queued push-triggered run would otherwise check out the older
+          # commit that triggered it, not the current tip of main.
+          ref: main
           fetch-depth: 0
 
       - uses: jdx/mise-action@v2
