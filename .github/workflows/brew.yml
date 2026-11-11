@@ -8,14 +8,21 @@ on:
     branches:
       - main
 
+concurrency:
+  group: brew
+  cancel-in-progress: false
+
 jobs:
   brew:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          # A queued push-triggered run would otherwise check out the older
+          # commit that triggered it, not the current tip of main.
+          ref: main
           fetch-depth: 0
 
       - uses: jdx/mise-action@v2
@@ -52,7 +59,21 @@ jobs:
           git diff --cached
           COMMIT_MSG=$(uv run python mise-tasks/generate-commit-message.py)
           git commit -m "$COMMIT_MSG" || exit 0
-          git push
+          # A push to main during the run makes a plain push non-fast-forward,
+          # which would drop that day's download snapshot. Rebase and retry.
+          # Never auto-resolve conflicts: the CSVs hold saved measurements, so a
+          # conflicting backfill must fail the run instead of being dropped.
+          for attempt in 1 2 3 4 5; do
+            git push && exit 0
+            echo "push attempt $attempt failed; rebasing and retrying"
+            # A failed fetch or rebase must not stop the loop (the step runs
+            # with set -e), so tolerate it and clean up any half-done rebase.
+            if ! git pull --rebase origin main; then
+              git rebase --abort 2>/dev/null || true
+            fi
+            sleep $((attempt * 5))
+          done
+          exit 1
 
 permissions:
   contents: write
