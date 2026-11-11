@@ -61,14 +61,14 @@ jobs:
           git commit -m "$COMMIT_MSG" || exit 0
           # A push to main during the run makes a plain push non-fast-forward,
           # which would drop that day's download snapshot. Rebase and retry.
-          # Every file this run writes is generated, so on a conflict keep this
-          # run's version (-X theirs is the replayed commit during a rebase).
+          # Never auto-resolve conflicts: the CSVs hold saved measurements, so a
+          # conflicting backfill must fail the run instead of being dropped.
           for attempt in 1 2 3 4 5; do
             git push && exit 0
             echo "push attempt $attempt failed; rebasing and retrying"
             # A failed fetch or rebase must not stop the loop (the step runs
             # with set -e), so tolerate it and clean up any half-done rebase.
-            if ! git pull --rebase -X theirs origin main; then
+            if ! git pull --rebase origin main; then
               git rebase --abort 2>/dev/null || true
             fi
             sleep $((attempt * 5))
