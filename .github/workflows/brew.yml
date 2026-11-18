@@ -27,6 +27,14 @@ jobs:
 
       - uses: jdx/mise-action@v2
 
+      # One transient HTTP failure used to fail the whole daily run, and a missed
+      # day cannot be recollected later (Homebrew only serves the current
+      # 30-day window). Retry every curl the fetch tasks make.
+      - name: Retry transient curl failures
+        run: |
+          printf 'retry = 5\nretry-delay = 10\nretry-all-errors\n' > "$RUNNER_TEMP/.curlrc"
+          echo "CURL_HOME=$RUNNER_TEMP" >> "$GITHUB_ENV"
+
       - name: Fetch Homebrew Analytics and GitHub Stars
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
