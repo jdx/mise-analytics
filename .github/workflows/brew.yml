@@ -33,7 +33,7 @@ jobs:
         if: github.event_name == 'schedule' && github.event.schedule == '0 20 * * *'
         run: |
           today=$(date -u +%F)
-          if grep -q "^$today," mise.csv top-repos-downloads.csv; then
+          if grep -q "^$today," mise.csv && grep -q "^$today," top-repos-downloads.csv; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
 
