@@ -96,6 +96,12 @@ jobs:
             fi
             sleep $((attempt * 5))
           done
+          # Every push failed and the runner is about to be discarded. Print
+          # the day's CSV rows so they can be re-added by hand.
+          echo "::error::git push failed after 5 attempts; the rows below were not saved"
+          echo "::group::Unsaved CSV rows ($(date -u +%F))"
+          git show --format= --unified=0 HEAD -- '*.csv'
+          echo "::endgroup::"
           exit 1
 
 permissions:
