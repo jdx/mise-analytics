@@ -16,7 +16,7 @@ fetch_formula_stats() {
     # Fetch GitHub stars
     STARS=$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" \
            "https://api.github.com/repos/jdx/$formula" | \
-           jq '.stargazers_count')
+           jq -e '.stargazers_count')
 
     # Convert to CSV format and append to history file
     echo "$DATE,$(jq -r '[.number, (.count | gsub(","; "")), .percent] | @csv' "/tmp/${formula}_analytics.json" | tr -d '"'),$STARS" >> "$output_file"

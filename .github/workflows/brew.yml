@@ -41,7 +41,7 @@ jobs:
             for attempt in 1 2 3 4 5; do
               mise run "$task" && continue 2
               echo "::warning::$task failed (attempt $attempt)"
-              sleep 10
+              sleep $((attempt * 30))
             done
             exit 1
           done

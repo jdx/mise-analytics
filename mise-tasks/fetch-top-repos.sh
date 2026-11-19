@@ -76,7 +76,7 @@ for repo in $TRACKED_REPOS; do
 done
 
 # Fetch Homebrew analytics data once
-BREW_DATA=$(curl -s https://formulae.brew.sh/api/analytics/install-on-request/30d.json)
+BREW_DATA=$(curl -fsS https://formulae.brew.sh/api/analytics/install-on-request/30d.json)
 
 # Process each tracked repo
 for entry in $TRACKED_REPOS; do
