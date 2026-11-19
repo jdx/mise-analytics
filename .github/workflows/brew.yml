@@ -5,7 +5,7 @@ on:
     - cron: '0 8 * * *'
     # Catch-up run: a failed morning run (for example a rejected push) cannot be
     # recollected tomorrow, so try again. It skips itself when today is saved.
-    - cron: '0 20 * * *'
+    - cron: '0 12 * * *'
   workflow_dispatch:
   push:
     branches:
@@ -30,7 +30,7 @@ jobs:
 
       - name: Skip the catch-up run when today is already collected
         id: collected
-        if: github.event_name == 'schedule' && github.event.schedule == '0 20 * * *'
+        if: github.event_name == 'schedule' && github.event.schedule == '0 12 * * *'
         run: |
           today=$(date -u +%F)
           if grep -q "^$today," mise.csv && grep -q "^$today," top-repos-downloads.csv; then
