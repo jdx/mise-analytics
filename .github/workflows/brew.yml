@@ -31,13 +31,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mise run fetch-stats
-          mise run fetch-competitors
-          mise run fetch-hk-competitors
-          mise run fetch-aube-competitors
-          mise run fetch-fnox-competitors
-          mise run fetch-top-repos
-          mise run fetch-top-repos-downloads
+          # One transient HTTP failure used to fail the whole run, and a missed
+          # day cannot be recollected later (Homebrew only serves the current
+          # 30-day window). Retry each fetch task as a whole: curl's own retry
+          # can replay a response into a pipe and duplicate or corrupt it.
+          for task in fetch-stats fetch-competitors fetch-hk-competitors \
+            fetch-aube-competitors fetch-fnox-competitors fetch-top-repos \
+            fetch-top-repos-downloads; do
+            for attempt in 1 2 3 4 5; do
+              mise run "$task" && continue 2
+              echo "::warning::$task failed (attempt $attempt)"
+              [ "$attempt" -lt 5 ] && sleep $((attempt * 30))
+            done
+            exit 1
+          done
 
       - name: Generate plots
         run: |

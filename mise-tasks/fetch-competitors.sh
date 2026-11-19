@@ -4,23 +4,23 @@ set -exuo pipefail
 DATE=$(date '+%Y-%m-%d')
 
 # Fetch GitHub stars for competitors
-MISE_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+MISE_STARS=$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" \
        https://api.github.com/repos/jdx/mise | \
        jq '.stargazers_count')
 
-ASDF_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+ASDF_STARS=$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" \
        https://api.github.com/repos/asdf-vm/asdf | \
        jq '.stargazers_count')
 
-HK_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+HK_STARS=$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" \
        https://api.github.com/repos/jdx/hk | \
        jq '.stargazers_count')
 
-JUST_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+JUST_STARS=$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" \
        https://api.github.com/repos/casey/just | \
        jq '.stargazers_count')
 
-BREW_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+BREW_STARS=$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" \
        https://api.github.com/repos/Homebrew/brew | \
        jq '.stargazers_count')
 
