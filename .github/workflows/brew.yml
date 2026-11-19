@@ -30,7 +30,7 @@ jobs:
 
       - name: Skip the catch-up run when today is already collected
         id: collected
-        if: github.event_name == 'schedule' && github.event.schedule == '0 12 * * *'
+        if: github.event_name == 'schedule'
         run: |
           today=$(date -u +%F)
           if grep -q "^$today," mise.csv && grep -q "^$today," top-repos-downloads.csv; then
