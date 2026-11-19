@@ -2,7 +2,10 @@ name: brew
 
 on:
   schedule:
-    - cron: '0 8 * * *' 
+    - cron: '0 8 * * *'
+    # Catch-up run: a failed morning run (for example a rejected push) cannot be
+    # recollected tomorrow, so try again. It skips itself when today is saved.
+    - cron: '0 12 * * *'
   workflow_dispatch:
   push:
     branches:
@@ -25,9 +28,20 @@ jobs:
           ref: main
           fetch-depth: 0
 
+      - name: Skip a scheduled run when today is already collected
+        id: collected
+        if: github.event_name == 'schedule'
+        run: |
+          today=$(date -u +%F)
+          if grep -q "^$today," mise.csv && grep -q "^$today," top-repos-downloads.csv; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: jdx/mise-action@v2
+        if: steps.collected.outputs.skip != 'true'
 
       - name: Fetch Homebrew Analytics and GitHub Stars
+        if: steps.collected.outputs.skip != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -47,6 +61,7 @@ jobs:
           done
 
       - name: Generate plots
+        if: steps.collected.outputs.skip != 'true'
         run: |
           mise run plot-stats
           mise run plot-hk-stats
@@ -59,6 +74,7 @@ jobs:
           mise run generate-fastest-growing
 
       - name: Commit changes
+        if: steps.collected.outputs.skip != 'true'
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
@@ -80,6 +96,12 @@ jobs:
             fi
             sleep $((attempt * 5))
           done
+          # Every push failed and the runner is about to be discarded. Print
+          # the day's CSV rows so they can be re-added by hand.
+          echo "::error::git push failed after 5 attempts; the rows below were not saved"
+          echo "::group::Unsaved CSV rows ($(date -u +%F))"
+          git show --format= --unified=0 HEAD -- '*.csv'
+          echo "::endgroup::"
           exit 1
 
 permissions:
