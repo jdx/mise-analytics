@@ -28,7 +28,7 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Skip the catch-up run when today is already collected
+      - name: Skip a scheduled run when today is already collected
         id: collected
         if: github.event_name == 'schedule'
         run: |
