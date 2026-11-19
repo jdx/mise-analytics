@@ -9,12 +9,12 @@ fetch_formula_stats() {
     local output_file=$2
 
     # Fetch Homebrew analytics
-    curl https://formulae.brew.sh/api/analytics/install-on-request/30d.json | \
+    curl -fsS https://formulae.brew.sh/api/analytics/install-on-request/30d.json | \
     jq -r ".items[] | select(.formula == \"$formula\")" | \
     tee "/tmp/${formula}_analytics.json"
 
     # Fetch GitHub stars
-    STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+    STARS=$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" \
            "https://api.github.com/repos/jdx/$formula" | \
            jq '.stargazers_count')
 
@@ -26,9 +26,9 @@ fetch_formula_stats() {
     echo "date,rank_change,install_change,star_change" > "${formula}-diff.csv"
     awk -F',' 'NR>1{
         if (NR>2) {
-            rank_change=prev_rank-$2
-            install_change=$3-prev_installs
-            star_change=$5-prev_stars
+            rank_change = ($2 == "" || prev_rank == "") ? "" : prev_rank-$2
+            install_change = ($3 == "" || prev_installs == "") ? "" : $3-prev_installs
+            star_change = ($5 == "" || prev_stars == "") ? "" : $5-prev_stars
             print prev_date "," rank_change "," install_change "," star_change
         }
         prev_date=$1

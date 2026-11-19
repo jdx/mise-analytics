@@ -10,19 +10,19 @@ if [ ! -f "$OUTPUT_FILE" ]; then
 fi
 
 # Fetch GitHub stars for hk and its competitors
-HK_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+HK_STARS=$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" \
            "https://api.github.com/repos/jdx/hk" | \
            jq '.stargazers_count')
 
-PRECOMMIT_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+PRECOMMIT_STARS=$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" \
            "https://api.github.com/repos/pre-commit/pre-commit" | \
            jq '.stargazers_count')
 
-PREK_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+PREK_STARS=$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" \
            "https://api.github.com/repos/j178/prek" | \
            jq '.stargazers_count')
 
-LEFTHOOK_STARS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+LEFTHOOK_STARS=$(curl -fsS -H "Authorization: Bearer $GITHUB_TOKEN" \
            "https://api.github.com/repos/evilmartians/lefthook" | \
            jq '.stargazers_count')
 
