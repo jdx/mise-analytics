@@ -16,6 +16,5 @@ jdx/demand
 jdx/packslip
 jdx/communique
 jdx/pklr
-jdx/jouet
 jdx/tak
 jdx/ruby
